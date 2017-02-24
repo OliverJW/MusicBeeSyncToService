@@ -219,3 +219,7 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 /packages/Mono.HttpUtility.1.0.0.1
+/GooglePlayMusicClient/GooglePlayMusicClient.nuspec
+/GooglePlayMusicClient/GooglePlayMusicAPI.1.1.0.nupkg
+/GooglePlayMusicClient/GooglePlayMusicAPI.1.0.1.nupkg
+/GooglePlayMusicClient/GooglePlayMusicAPI.1.0.0.nupkg

@@ -12,4 +12,7 @@
     <StartAction>Program</StartAction>
     <StartProgram>C:\Program Files (x86)\MusicBee\MusicBee.exe</StartProgram>
   </PropertyGroup>
+  <PropertyGroup>
+    <ProjectView>ProjectFiles</ProjectView>
+  </PropertyGroup>
 </Project>

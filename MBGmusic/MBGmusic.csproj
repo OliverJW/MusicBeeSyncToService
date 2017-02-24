@@ -75,10 +75,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GooglePlayMusicAPI, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\GooglePlayMusicAPI.1.1.0\lib\net452\GooglePlayMusicAPI.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Mono.HttpUtility, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.HttpUtility.1.0.0.1\lib\net40\Mono.HttpUtility.dll</HintPath>
       <Private>True</Private>
@@ -150,7 +146,12 @@
       <DependentUpon>Configure.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\GooglePlayMusicClient\GooglePlayMusicClient.csproj">
+      <Project>{7d0a5653-e2c3-4cef-aae1-cf19d4ec3516}</Project>
+      <Name>GooglePlayMusicClient</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /Y "$(TargetDir)\*.*" "C:\Program Files (x86)\MusicBee\Plugins\"</PostBuildEvent>
