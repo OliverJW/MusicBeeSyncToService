@@ -5,6 +5,7 @@ using System.Text;
 using MusicBeePlugin.Models;
 using System.IO;
 using GooglePlayMusicAPI;
+using GooglePlayMusicAPI.Models.GooglePlayMusicModels;
 
 namespace MusicBeePlugin
 {
@@ -86,20 +87,20 @@ namespace MusicBeePlugin
         // Create a new playlist with the GMusic playlist contents
         public void SyncPlaylistsToMusicBee(List<Playlist> playlists, List<Track> allGMusicSongs)
         {
-            
-            // The API doesn't give us a directory for playlists, 
-            // We need to guess by finding the root directory of the first playlist
-            /* Apparently playlistDir = "" is "root" playlist dir, so this is unneeded.
-            MbPlaylist useForDir = localPlaylists.First();
-            String playlistDir = new FileInfo(useForDir.mbName).DirectoryName;
-            if (useForDir.Name.Contains('\\'))
-            {
-                String folder = useForDir.Name.Split('\\')[0];
-                playlistDir = playlistDir.Replace(folder, "");
-            }*/
+            // Get the absolute path to the root of playlist dir
+            // We do this by creating a blank playlist and seeing where it was created
+            string tempPlaylistName = "mbsynctempplaylist";
+            _mbApiInterface.Playlist_CreatePlaylist("", tempPlaylistName, new string[] { });
 
             List<MbPlaylist> localPlaylists = GetMbPlaylists();
             List<MbSong> allMbSongs = GetMbSongs();
+
+            // Find the root dir from the temp playlist
+            // clean up temp playlist
+            MbPlaylist tempPlaylist = localPlaylists.FirstOrDefault(x => x.Name == tempPlaylistName);
+            string[] tempPlaylistPathSplit = tempPlaylist.mbName.Split('\\');
+            string musicBeePlaylistRootDir = String.Join("\\", tempPlaylistPathSplit.Take(tempPlaylistPathSplit.Length - 1).ToArray());
+            _mbApiInterface.Playlist_DeletePlaylist(tempPlaylist.mbName);
 
             // Go through each playlist we want to sync in turn
             foreach (Playlist playlist in playlists)
@@ -112,12 +113,14 @@ namespace MusicBeePlugin
                 // If we find it, add it to the list of local songs
                 foreach (PlaylistEntry entry in playlist.Songs)
                 {
-                    Track thisSong = allGMusicSongs.FirstOrDefault(s => s.ID == entry.TrackID);
+                    Track thisSong = allGMusicSongs.FirstOrDefault(s => s.Id == entry.TrackID);
                     if (thisSong != null)
                     {
                         MbSong thisMbSong = allMbSongs.FirstOrDefault(s => s.Artist == thisSong.Artist && s.Title == thisSong.Title);
                         if (thisMbSong != null)
+                        {
                             mbPlaylistSongs.Add(thisMbSong);
+                        }
                     }
                 }
 
@@ -144,11 +147,17 @@ namespace MusicBeePlugin
                 }
                 else
                 {
-                    // Create the playlist
-                    _mbApiInterface.Playlist_CreatePlaylist("", playlist.Name, mbPlaylistSongFiles);
-                    // I haven't been able to get a playlist to be created in a directory yet
-                    // For now, don't give that option
-                   // _mbApiInterface.Playlist_CreatePlaylist(_settings.PlaylistDirectory, playlist.Name, mbPlaylistSongFiles);
+                    // Create the playlist locally
+                    string playlistRelativeDir = "";
+                    string playlistName = playlist.Name;
+                    string[] itemsInPath = playlist.Name.Split('\\');
+                    if (itemsInPath.Length > 1)
+                    {
+                        // Creates a playlist at top level directory
+                        _mbApiInterface.Playlist_CreatePlaylist("", playlist.Name, mbPlaylistSongFiles);
+                    }
+
+                    _mbApiInterface.Playlist_CreatePlaylist(playlistRelativeDir, playlistName, mbPlaylistSongFiles);
                 }
             }
 

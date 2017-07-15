@@ -6,6 +6,8 @@ using System.Threading;
 using MusicBeePlugin.Models;
 using System.Threading.Tasks;
 using GooglePlayMusicAPI;
+using GooglePlayMusicAPI.Models.GooglePlayMusicModels;
+using GooglePlayMusicAPI.Models.RequestModels;
 
 namespace MusicBeePlugin
 {
@@ -101,7 +103,17 @@ namespace MusicBeePlugin
                     // If there is one, clear it's contents, otherwise create one
                     // Unless it's been deleted, in which case pretend it doesn't exist.
                     // I'm not sure how to undelete a playlist, or even if you can
-                    Playlist thisPlaylist = _allPlaylists.FirstOrDefault(p => p.Name == playlist.Name && p.Deleted == false);
+                    string gpmPlaylistName = null;
+                    if (_settings.IncludeFoldersInPlaylistName)
+                    {
+                        gpmPlaylistName = playlist.Name;
+                    }
+                    else
+                    {
+                        gpmPlaylistName = playlist.Name.Split('\\').Last();
+                    }
+
+                    Playlist thisPlaylist = _allPlaylists.FirstOrDefault(p => p.Name == gpmPlaylistName && p.Deleted == false);
                     String thisPlaylistID = "";
                     if (thisPlaylist != null)
                     {
@@ -111,11 +123,11 @@ namespace MusicBeePlugin
                         {
                             MutatePlaylistResponse response = await api.RemoveFromPlaylistAsync(allPlsSongs);
                         }
-                        thisPlaylistID = thisPlaylist.ID;
+                        thisPlaylistID = thisPlaylist.Id;
                     }
                     else
                     {
-                        MutatePlaylistResponse response = await api.CreatePlaylistAsync(playlist.Name);
+                        MutatePlaylistResponse response = await api.CreatePlaylistAsync(gpmPlaylistName);
                         thisPlaylistID = response.MutateResponses.First().ID;
                     }
 

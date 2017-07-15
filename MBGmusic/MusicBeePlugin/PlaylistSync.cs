@@ -5,6 +5,8 @@ using System.Text;
 using MusicBeePlugin.Models;
 using System.Threading;
 using GooglePlayMusicAPI;
+using System.Threading.Tasks;
+using GooglePlayMusicAPI.Models.GooglePlayMusicModels;
 
 namespace MusicBeePlugin
 {
@@ -48,14 +50,9 @@ namespace MusicBeePlugin
                 List<MbPlaylist> allPlaylists = _mbSync.GetMbPlaylists();
                 // Only sync the playlists that the settings say we should
                 // Surely there's a nicer LINQ query for this?
-                foreach (MbPlaylist pls in allPlaylists)
-                {
-                    if (_settings.MBPlaylistsToSync.Contains(pls.mbName))
-                    {
-                        playlists.Add(pls);
-                    }
-                }
-                 _gMusic.SyncPlaylistsToGMusic(playlists);   
+                // There is :)
+                playlists = allPlaylists.Where(p => _settings.MBPlaylistsToSync.Contains(p.mbName)).ToList();
+                _gMusic.SyncPlaylistsToGMusic(playlists);   
             }
             else
             {
@@ -64,14 +61,11 @@ namespace MusicBeePlugin
                     List<Playlist> playlists = new List<Playlist>();
                     foreach (string id in _settings.GMusicPlaylistsToSync)
                     {
-                        Playlist pls = _gMusic.AllPlaylists.FirstOrDefault(p => p.ID == id);
+                        Playlist pls = _gMusic.AllPlaylists.FirstOrDefault(p => p.Id == id);
                         if (pls != null)
                             playlists.Add(pls);
                     }
                     _mbSync.SyncPlaylistsToMusicBee(playlists, _gMusic.AllSongs);
-                    return;
-                } else {
-                    return;
                 }
             }
 

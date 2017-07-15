@@ -44,18 +44,18 @@
             this.label2 = new System.Windows.Forms.Label();
             this.allLocalPlayCheckbox = new System.Windows.Forms.CheckBox();
             this.allRemotePlayCheckbox = new System.Windows.Forms.CheckBox();
-            this.closeButton = new System.Windows.Forms.Button();
             this.toGMusicRadiobutton = new System.Windows.Forms.RadioButton();
             this.fromGMusicRadioButton = new System.Windows.Forms.RadioButton();
             this.fetchPlaylistStatusLabel = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.includeFoldersInNameCheckBox = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // loginButton
             // 
             this.loginButton.Location = new System.Drawing.Point(754, 50);
-            this.loginButton.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.loginButton.Margin = new System.Windows.Forms.Padding(6);
             this.loginButton.Name = "loginButton";
             this.loginButton.Size = new System.Drawing.Size(150, 44);
             this.loginButton.TabIndex = 0;
@@ -66,7 +66,7 @@
             // emailTextBox
             // 
             this.emailTextBox.Location = new System.Drawing.Point(24, 50);
-            this.emailTextBox.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.emailTextBox.Margin = new System.Windows.Forms.Padding(6);
             this.emailTextBox.Name = "emailTextBox";
             this.emailTextBox.Size = new System.Drawing.Size(316, 31);
             this.emailTextBox.TabIndex = 1;
@@ -84,7 +84,7 @@
             // passwordTextBox
             // 
             this.passwordTextBox.Location = new System.Drawing.Point(384, 50);
-            this.passwordTextBox.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.passwordTextBox.Margin = new System.Windows.Forms.Padding(6);
             this.passwordTextBox.Name = "passwordTextBox";
             this.passwordTextBox.PasswordChar = '*';
             this.passwordTextBox.Size = new System.Drawing.Size(316, 31);
@@ -104,7 +104,7 @@
             // 
             this.rememberCheckbox.AutoSize = true;
             this.rememberCheckbox.Location = new System.Drawing.Point(754, 15);
-            this.rememberCheckbox.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.rememberCheckbox.Margin = new System.Windows.Forms.Padding(6);
             this.rememberCheckbox.Name = "rememberCheckbox";
             this.rememberCheckbox.Size = new System.Drawing.Size(207, 29);
             this.rememberCheckbox.TabIndex = 5;
@@ -123,10 +123,10 @@
             // 
             // syncNowButton
             // 
-            this.syncNowButton.Location = new System.Drawing.Point(312, 1008);
-            this.syncNowButton.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.syncNowButton.Location = new System.Drawing.Point(830, 1058);
+            this.syncNowButton.Margin = new System.Windows.Forms.Padding(6);
             this.syncNowButton.Name = "syncNowButton";
-            this.syncNowButton.Size = new System.Drawing.Size(250, 44);
+            this.syncNowButton.Size = new System.Drawing.Size(284, 44);
             this.syncNowButton.TabIndex = 8;
             this.syncNowButton.Text = "Synchronise Selected";
             this.syncNowButton.UseVisualStyleBackColor = true;
@@ -145,7 +145,7 @@
             // syncStatusLabel
             // 
             this.syncStatusLabel.AutoSize = true;
-            this.syncStatusLabel.Location = new System.Drawing.Point(608, 1017);
+            this.syncStatusLabel.Location = new System.Drawing.Point(825, 1015);
             this.syncStatusLabel.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.syncStatusLabel.Name = "syncStatusLabel";
             this.syncStatusLabel.Size = new System.Drawing.Size(137, 25);
@@ -157,7 +157,7 @@
             this.localPlaylistBox.CheckOnClick = true;
             this.localPlaylistBox.FormattingEnabled = true;
             this.localPlaylistBox.Location = new System.Drawing.Point(12, 88);
-            this.localPlaylistBox.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.localPlaylistBox.Margin = new System.Windows.Forms.Padding(6);
             this.localPlaylistBox.Name = "localPlaylistBox";
             this.localPlaylistBox.Size = new System.Drawing.Size(526, 680);
             this.localPlaylistBox.TabIndex = 11;
@@ -168,7 +168,7 @@
             this.googleMusicPlaylistBox.CheckOnClick = true;
             this.googleMusicPlaylistBox.FormattingEnabled = true;
             this.googleMusicPlaylistBox.Location = new System.Drawing.Point(564, 88);
-            this.googleMusicPlaylistBox.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.googleMusicPlaylistBox.Margin = new System.Windows.Forms.Padding(6);
             this.googleMusicPlaylistBox.Name = "googleMusicPlaylistBox";
             this.googleMusicPlaylistBox.Size = new System.Drawing.Size(526, 680);
             this.googleMusicPlaylistBox.TabIndex = 12;
@@ -198,7 +198,7 @@
             // 
             this.allLocalPlayCheckbox.AutoSize = true;
             this.allLocalPlayCheckbox.Location = new System.Drawing.Point(398, 44);
-            this.allLocalPlayCheckbox.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.allLocalPlayCheckbox.Margin = new System.Windows.Forms.Padding(6);
             this.allLocalPlayCheckbox.Name = "allLocalPlayCheckbox";
             this.allLocalPlayCheckbox.Size = new System.Drawing.Size(134, 29);
             this.allLocalPlayCheckbox.TabIndex = 15;
@@ -210,7 +210,7 @@
             // 
             this.allRemotePlayCheckbox.AutoSize = true;
             this.allRemotePlayCheckbox.Location = new System.Drawing.Point(954, 44);
-            this.allRemotePlayCheckbox.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.allRemotePlayCheckbox.Margin = new System.Windows.Forms.Padding(6);
             this.allRemotePlayCheckbox.Name = "allRemotePlayCheckbox";
             this.allRemotePlayCheckbox.Size = new System.Drawing.Size(134, 29);
             this.allRemotePlayCheckbox.TabIndex = 16;
@@ -218,24 +218,12 @@
             this.allRemotePlayCheckbox.UseVisualStyleBackColor = true;
             this.allRemotePlayCheckbox.CheckedChanged += new System.EventHandler(this.allRemotePlayCheckbox_CheckedChanged);
             // 
-            // closeButton
-            // 
-            this.closeButton.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.closeButton.Location = new System.Drawing.Point(980, 1058);
-            this.closeButton.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
-            this.closeButton.Name = "closeButton";
-            this.closeButton.Size = new System.Drawing.Size(150, 44);
-            this.closeButton.TabIndex = 17;
-            this.closeButton.Text = "Close";
-            this.closeButton.UseVisualStyleBackColor = true;
-            this.closeButton.Click += new System.EventHandler(this.closeButton_Click);
-            // 
             // toGMusicRadiobutton
             // 
             this.toGMusicRadiobutton.AutoSize = true;
             this.toGMusicRadiobutton.Checked = true;
             this.toGMusicRadiobutton.Location = new System.Drawing.Point(24, 1013);
-            this.toGMusicRadiobutton.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.toGMusicRadiobutton.Margin = new System.Windows.Forms.Padding(6);
             this.toGMusicRadiobutton.Name = "toGMusicRadiobutton";
             this.toGMusicRadiobutton.Size = new System.Drawing.Size(231, 29);
             this.toGMusicRadiobutton.TabIndex = 18;
@@ -248,7 +236,7 @@
             // 
             this.fromGMusicRadioButton.AutoSize = true;
             this.fromGMusicRadioButton.Location = new System.Drawing.Point(24, 1058);
-            this.fromGMusicRadioButton.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.fromGMusicRadioButton.Margin = new System.Windows.Forms.Padding(6);
             this.fromGMusicRadioButton.Name = "fromGMusicRadioButton";
             this.fromGMusicRadioButton.Size = new System.Drawing.Size(255, 29);
             this.fromGMusicRadioButton.TabIndex = 19;
@@ -276,24 +264,35 @@
             this.groupBox1.Controls.Add(this.allRemotePlayCheckbox);
             this.groupBox1.Controls.Add(this.googleMusicPlaylistBox);
             this.groupBox1.Location = new System.Drawing.Point(24, 163);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(6);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(6);
             this.groupBox1.Size = new System.Drawing.Size(1106, 812);
             this.groupBox1.TabIndex = 21;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Set Up Sync";
+            // 
+            // includeFoldersInNameCheckBox
+            // 
+            this.includeFoldersInNameCheckBox.AutoSize = true;
+            this.includeFoldersInNameCheckBox.Location = new System.Drawing.Point(346, 1013);
+            this.includeFoldersInNameCheckBox.Name = "includeFoldersInNameCheckBox";
+            this.includeFoldersInNameCheckBox.Size = new System.Drawing.Size(351, 29);
+            this.includeFoldersInNameCheckBox.TabIndex = 22;
+            this.includeFoldersInNameCheckBox.Text = "Include Folders in Playlist Name";
+            this.includeFoldersInNameCheckBox.UseVisualStyleBackColor = true;
+            this.includeFoldersInNameCheckBox.CheckedChanged += new System.EventHandler(this.includeFoldersInNameCheckBox_CheckedChanged);
             // 
             // Configure
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1154, 1125);
+            this.Controls.Add(this.includeFoldersInNameCheckBox);
             this.Controls.Add(this.fetchPlaylistStatusLabel);
             this.Controls.Add(this.syncStatusLabel);
             this.Controls.Add(this.fromGMusicRadioButton);
             this.Controls.Add(this.toGMusicRadiobutton);
-            this.Controls.Add(this.closeButton);
             this.Controls.Add(this.loginStatusLabel);
             this.Controls.Add(this.syncNowButton);
             this.Controls.Add(this.warnSaveLabel);
@@ -304,7 +303,7 @@
             this.Controls.Add(this.emailTextBox);
             this.Controls.Add(this.loginButton);
             this.Controls.Add(this.groupBox1);
-            this.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "Configure";
             this.Text = "Google Music Sync";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Configure_FormClosing);
@@ -333,10 +332,10 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox allLocalPlayCheckbox;
         private System.Windows.Forms.CheckBox allRemotePlayCheckbox;
-        private System.Windows.Forms.Button closeButton;
         private System.Windows.Forms.RadioButton toGMusicRadiobutton;
         private System.Windows.Forms.RadioButton fromGMusicRadioButton;
         private System.Windows.Forms.Label fetchPlaylistStatusLabel;
         private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.CheckBox includeFoldersInNameCheckBox;
     }
 }

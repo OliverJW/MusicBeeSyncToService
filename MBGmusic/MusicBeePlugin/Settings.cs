@@ -19,11 +19,12 @@ namespace MusicBeePlugin
             // defaults
             SyncOnStartup = false;
             SyncLocalToRemote = true;
+            IncludeFoldersInPlaylistName = false;
 
             PlaylistDirectory = "GMusic";
 
             SettingsFile = filename;
-           
+
         }
 
         public Settings()
@@ -43,6 +44,7 @@ namespace MusicBeePlugin
         public List<String> MBPlaylistsToSync { get; private set; }
         public List<String> GMusicPlaylistsToSync { get; private set; }
         public String PlaylistDirectory { get; set; }
+        public Boolean IncludeFoldersInPlaylistName { get; set; }
 
         public bool Save()
         {

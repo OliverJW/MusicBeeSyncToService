@@ -12,6 +12,7 @@ using MusicBeePlugin.Models;
 using System.Threading.Tasks;
 using GooglePlayMusicAPI;
 using System.Security;
+using GooglePlayMusicAPI.Models.GooglePlayMusicModels;
 
 namespace MusicBeePlugin
 {
@@ -117,7 +118,6 @@ namespace MusicBeePlugin
             this.Invoke(new MethodInvoker(delegate
             {
                 syncStatusLabel.Text = "Synchronisation done!";
-                closeButton.Enabled = false;
                 populateLocalPlaylists();
             }));
         }
@@ -127,7 +127,6 @@ namespace MusicBeePlugin
             this.Invoke(new MethodInvoker(delegate
             {
                 syncStatusLabel.Text = "Synchronisation done!";
-                closeButton.Enabled = false;
                 // Just refresh the playlists (don't bother fetching all the songs again)
                 _playlistSync.GMusic.FetchPlaylists();
             }));
@@ -174,7 +173,6 @@ namespace MusicBeePlugin
                 updateLoginStatus("LOGIN FAILED. PLEASE TRY AGAIN");
             }
 
-            this.closeButton.Enabled = true;
             this.syncNowButton.Enabled = true;
             //this.autoSyncCheckbox.Enabled = true;
             List<Playlist> allPlaylists = await _playlistSync.GMusic.FetchPlaylists();
@@ -183,7 +181,7 @@ namespace MusicBeePlugin
             {
                 if (!playlist.Deleted)
                 {
-                    if (_settings.GMusicPlaylistsToSync.Contains(playlist.ID))
+                    if (_settings.GMusicPlaylistsToSync.Contains(playlist.Id))
                         googleMusicPlaylistBox.Items.Add(playlist, true);
                     else
                         googleMusicPlaylistBox.Items.Add(playlist, false);
@@ -232,13 +230,10 @@ namespace MusicBeePlugin
                 return;
             }
 
-            closeButton.Enabled = false;
             updateSyncStatus("Now synchronising. Please wait.");
 
 
             _playlistSync.SyncPlaylists();
-
-            updateSyncStatus("Done Synching.");
 
             //                List<GMusicPlaylist> selected = new List<GMusicPlaylist>();
             //foreach (GMusicPlaylist selectedPlaylist in googleMusicPlaylistBox.CheckedItems)
@@ -330,7 +325,7 @@ namespace MusicBeePlugin
             _settings.GMusicPlaylistsToSync.Clear();
             foreach (Playlist playlist in googleMusicPlaylistBox.CheckedItems)
             {
-                _settings.GMusicPlaylistsToSync.Add(playlist.ID);
+                _settings.GMusicPlaylistsToSync.Add(playlist.Id);
             }
             _settings.Save();
         }
@@ -352,6 +347,9 @@ namespace MusicBeePlugin
             this.unsubscribeEvents();
         }
 
-        
+        private void includeFoldersInNameCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            _settings.IncludeFoldersInPlaylistName = includeFoldersInNameCheckBox.Checked;
+        }
     }
 }
