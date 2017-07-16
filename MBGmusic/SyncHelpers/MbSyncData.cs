@@ -50,6 +50,7 @@ namespace MusicBeePlugin
                 playlist = _mbApiInterface.Playlist_QueryGetNextPlaylist();
             }
 
+            MbPlaylists = MbPlaylists.OrderBy(p => p.Name).ToList();
             return MbPlaylists;
         }
 

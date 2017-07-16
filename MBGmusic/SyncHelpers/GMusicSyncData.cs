@@ -81,6 +81,10 @@ namespace MusicBeePlugin
         public async Task<List<Playlist>> FetchPlaylists()
         {
             _allPlaylists = await api.GetPlaylistsWithEntriesAsync();
+            if (_allPlaylists.Count > 0)
+            {
+                _allPlaylists = _allPlaylists.OrderBy(p => p.Name).ToList();
+            }
             return _allPlaylists;
         }
 
@@ -150,9 +154,22 @@ namespace MusicBeePlugin
                     {
                         string title = _mbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.TrackTitle);
                         string artist = _mbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.Artist);
-                        Track gSong = _allSongs.FirstOrDefault(item => (item.Artist == artist && item.Title == title));
-                        if (gSong != null)
+                        string album = _mbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.Album);
+
+                        // First check for matching title, artist, album, if we find nothing, then check for matching title/artist
+                        Track gSong = _allSongs.FirstOrDefault(item => (item.Artist == artist && item.Title == title && item.Album == album));
+                        if (gSong == null)
+                        {
+                            gSong = _allSongs.FirstOrDefault(item => (item.Artist == artist && item.Title == title));
+                            if (gSong != null)
+                            {
+                                songsToAdd.Add(gSong);
+                            }
+                        }
+                        else
+                        {
                             songsToAdd.Add(gSong);
+                        }
                     }
 
                     await api.AddToPlaylistAsync(thisPlaylistID, songsToAdd);
