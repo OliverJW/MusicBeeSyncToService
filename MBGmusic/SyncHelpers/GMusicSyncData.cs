@@ -54,7 +54,6 @@ namespace MusicBeePlugin
         public async Task<bool> LoginToGMusic(string email, string password)
         {
             bool result = await api.LoginAsync(email, password);
-            FetchLibraryAndPlaylists();
             return result;
         }
 
@@ -65,11 +64,12 @@ namespace MusicBeePlugin
         // The global-ish stuff we need to sync with Google Music
         private GooglePlayMusicClient api = new GooglePlayMusicClient();
 
-        public async void FetchLibraryAndPlaylists()
+        public async Task<bool> FetchLibraryAndPlaylists()
         {
             _allSongs = await api.GetLibraryAsync();
             _allPlaylists = await api.GetPlaylistsWithEntriesAsync();
             _dataFetched = true;
+            return _dataFetched;
         }
 
         public async Task<List<Track>> FetchLibrary()
@@ -85,6 +85,21 @@ namespace MusicBeePlugin
             {
                 _allPlaylists = _allPlaylists.OrderBy(p => p.Name).ToList();
             }
+
+            // get songs that are in GMusic playlists but not in GMusic library
+            foreach (Playlist playlist in _allPlaylists)
+            {
+                foreach (PlaylistEntry entry in playlist.Songs)
+                {
+                    if (_allSongs.FirstOrDefault(t => t.Id == entry.TrackID || t.NID == entry.TrackID) == null)
+                    {
+                        Track track = await api.GetTrackAsync(entry.TrackID);
+                        _allSongs.Add(track);
+                    }
+                }
+            }
+
+            _dataFetched = true;
             return _allPlaylists;
         }
 
@@ -93,7 +108,7 @@ namespace MusicBeePlugin
         #region Sync to GMusic
 
         // Synchronise the playlists defined in the settings file to Google Music
-        public async void SyncPlaylistsToGMusic(List<MbPlaylist> mbPlaylistsToSync)
+        public async Task<bool> SyncPlaylistsToGMusic(List<MbPlaylist> mbPlaylistsToSync)
         {
             _syncRunning = true;
             AutoResetEvent waitForEvent = new AutoResetEvent(false);
@@ -183,7 +198,7 @@ namespace MusicBeePlugin
                 throw new Exception("Not fetched data yet");
             }
 
-
+            return true;
         }
 
         #endregion

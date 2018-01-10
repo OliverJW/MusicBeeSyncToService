@@ -6,6 +6,7 @@ using MusicBeePlugin.Models;
 using System.IO;
 using GooglePlayMusicAPI;
 using GooglePlayMusicAPI.Models.GooglePlayMusicModels;
+using System.Threading.Tasks;
 
 namespace MusicBeePlugin
 {
@@ -86,7 +87,7 @@ namespace MusicBeePlugin
         // Go through the selected playlists from GMusic,
         // delete the correspondingly named MusicBee playlist
         // Create a new playlist with the GMusic playlist contents
-        public void SyncPlaylistsToMusicBee(List<Playlist> playlists, List<Track> allGMusicSongs)
+        public async Task<bool> SyncPlaylistsToMusicBee(List<Playlist> playlists, List<Track> allGMusicSongs)
         {
             // Get the absolute path to the root of playlist dir
             // We do this by creating a blank playlist and seeing where it was created
@@ -114,7 +115,7 @@ namespace MusicBeePlugin
                 // If we find it, add it to the list of local songs
                 foreach (PlaylistEntry entry in playlist.Songs)
                 {
-                    Track thisSong = allGMusicSongs.FirstOrDefault(s => s.Id == entry.TrackID);
+                    Track thisSong = allGMusicSongs.FirstOrDefault(s => s.Id == entry.TrackID || s.NID == entry.TrackID);
                     if (thisSong != null)
                     {
                         MbSong thisMbSong = allMbSongs.FirstOrDefault(s => s.Artist == thisSong.Artist && s.Title == thisSong.Title);
@@ -164,9 +165,7 @@ namespace MusicBeePlugin
 
             // Get the local playlists again
 
-            // Call the delegate
-            if (OnSyncComplete != null)
-                OnSyncComplete(this, new EventArgs());
+            return true;
         }
 
 
