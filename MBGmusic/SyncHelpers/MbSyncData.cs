@@ -152,11 +152,18 @@ namespace MusicBeePlugin
                     // Create the playlist locally
                     string playlistRelativeDir = "";
                     string playlistName = playlist.Name;
+
+                    // if it's a date playlist, remove first Z
+                    if (playlistName.StartsWith("Z "))
+                    {
+                        playlistName = playlistName.Skip(2).ToString();
+                    }
+
                     string[] itemsInPath = playlist.Name.Split('\\');
                     if (itemsInPath.Length > 1)
                     {
                         // Creates a playlist at top level directory
-                        _mbApiInterface.Playlist_CreatePlaylist("", playlist.Name, mbPlaylistSongFiles);
+                        _mbApiInterface.Playlist_CreatePlaylist("", playlistName, mbPlaylistSongFiles);
                     }
 
                     _mbApiInterface.Playlist_CreatePlaylist(playlistRelativeDir, playlistName, mbPlaylistSongFiles);

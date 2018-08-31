@@ -132,6 +132,15 @@ namespace MusicBeePlugin
                         gpmPlaylistName = playlist.Name.Split('\\').Last();
                     }
 
+                    if (_settings.IncludeZAtStartOfDatePlaylistName)
+                    {
+                        // if it starts with a 2, it's a date playlist
+                        if (gpmPlaylistName.StartsWith("2"))
+                        {
+                            gpmPlaylistName = $"Z {gpmPlaylistName}";
+                        }
+                    }
+
                     Playlist thisPlaylist = _allPlaylists.FirstOrDefault(p => p.Name == gpmPlaylistName && p.Deleted == false);
                     String thisPlaylistID = "";
                     if (thisPlaylist != null)
@@ -180,6 +189,22 @@ namespace MusicBeePlugin
                             {
                                 songsToAdd.Add(gSong);
                             }
+                            else
+                            {
+                                // Didn't find it in cached library, so query for it
+                                SearchResult result = await api.SearchAsync($"{artist} {title} {album}", types: new SearchEntryType[] { SearchEntryType.Track });
+                                if (result.Tracks != null && result.Tracks.Count > 0)
+                                {
+                                    // most likely the track is the first one
+                                    gSong = result.Tracks.First();
+                                    songsToAdd.Add(gSong);
+                                }
+                                else
+                                {
+                                    // didn't find it even via querying 
+                                }
+                            }
+
                         }
                         else
                         {

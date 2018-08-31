@@ -100,6 +100,8 @@ namespace MusicBeePlugin
             }
 
             rememberCheckbox.Checked = _settings.SaveCredentials;
+            includeFoldersInNameCheckBox.Checked = _settings.IncludeFoldersInPlaylistName;
+            includeZInDatePlaylistsCheckbox.Checked = _settings.IncludeZAtStartOfDatePlaylistName;
 
            // autoSyncCheckbox.Checked = _settings.SyncOnStartup;
 
@@ -230,8 +232,9 @@ namespace MusicBeePlugin
 
             WriteLine("Now synchronising. Please wait.");
 
-
-            bool result = await _playlistSync.SyncPlaylists();
+            List<MbPlaylist> mbPlaylists = getMbPlaylistsToSync();
+            List<Playlist> gmusicPlaylists = getGMusicPlaylistToSync();
+            bool result = await _playlistSync.SyncPlaylists(mbPlaylists, gmusicPlaylists);
 
             WriteLine(result ? "Synchronize success." : "Error during synchronizing");
 
@@ -239,6 +242,27 @@ namespace MusicBeePlugin
             //foreach (GMusicPlaylist selectedPlaylist in googleMusicPlaylistBox.CheckedItems)
              //   selected.Add(selectedPlaylist);
 
+        }
+
+        private List<MbPlaylist> getMbPlaylistsToSync()
+        {
+            List<MbPlaylist> result = new List<MbPlaylist>();
+            foreach (MbPlaylist playlist in localPlaylistBox.CheckedItems)
+            {
+                result.Add(playlist);
+            }
+
+            return result;
+        }
+
+        private List<Playlist> getGMusicPlaylistToSync()
+        {
+            List<Playlist> result = new List<Playlist>();
+            foreach (Playlist playlist in googleMusicPlaylistBox.CheckedItems)
+            {
+                result.Add(playlist);
+            }
+            return result;
         }
 
         private void toGMusicRadiobutton_CheckedChanged(object sender, EventArgs e)
@@ -350,6 +374,11 @@ namespace MusicBeePlugin
         private void includeFoldersInNameCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             _settings.IncludeFoldersInPlaylistName = includeFoldersInNameCheckBox.Checked;
+        }
+
+        private void includeZInDatePlaylistsCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            _settings.IncludeZAtStartOfDatePlaylistName = includeZInDatePlaylistsCheckbox.Checked;
         }
     }
 }

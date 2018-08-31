@@ -39,7 +39,7 @@ namespace MusicBeePlugin
         /// <summary>
         /// This is blocking, so run it on a thread
         /// </summary>
-        public async Task<bool> SyncPlaylists()
+        public async Task<bool> SyncPlaylists(List<MbPlaylist> mbPlaylists, List<Playlist> gmusicPlaylists)
         {
             bool result = true;
 
@@ -48,26 +48,13 @@ namespace MusicBeePlugin
 
             if (_settings.SyncLocalToRemote)
             {
-                List<MbPlaylist> playlists = new List<MbPlaylist>();
-                List<MbPlaylist> allPlaylists = _mbSync.GetMbPlaylists();
-                // Only sync the playlists that the settings say we should
-                // Surely there's a nicer LINQ query for this?
-                // There is :)
-                playlists = allPlaylists.Where(p => _settings.MBPlaylistsToSync.Contains(p.mbName)).ToList();
-                result = await _gMusic.SyncPlaylistsToGMusic(playlists);   
+                result = await _gMusic.SyncPlaylistsToGMusic(mbPlaylists);
             }
             else
             {
                 if (_gMusic.DataFetched)
                 {
-                    List<Playlist> playlists = new List<Playlist>();
-                    foreach (string id in _settings.GMusicPlaylistsToSync)
-                    {
-                        Playlist pls = _gMusic.AllPlaylists.FirstOrDefault(p => p.Id == id);
-                        if (pls != null)
-                            playlists.Add(pls);
-                    }
-                    result = await _mbSync.SyncPlaylistsToMusicBee(playlists, _gMusic.AllSongs);
+                    result = await _mbSync.SyncPlaylistsToMusicBee(gmusicPlaylists, _gMusic.AllSongs);
                 }
             }
 

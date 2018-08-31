@@ -47,6 +47,7 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.includeFoldersInNameCheckBox = new System.Windows.Forms.CheckBox();
             this.outputTextBox = new System.Windows.Forms.RichTextBox();
+            this.includeZInDatePlaylistsCheckbox = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -258,11 +259,25 @@
             this.outputTextBox.TabIndex = 23;
             this.outputTextBox.Text = "";
             // 
+            // includeZInDatePlaylistsCheckbox
+            // 
+            this.includeZInDatePlaylistsCheckbox.AutoSize = true;
+            this.includeZInDatePlaylistsCheckbox.Checked = true;
+            this.includeZInDatePlaylistsCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.includeZInDatePlaylistsCheckbox.Location = new System.Drawing.Point(320, 970);
+            this.includeZInDatePlaylistsCheckbox.Name = "includeZInDatePlaylistsCheckbox";
+            this.includeZInDatePlaylistsCheckbox.Size = new System.Drawing.Size(365, 29);
+            this.includeZInDatePlaylistsCheckbox.TabIndex = 24;
+            this.includeZInDatePlaylistsCheckbox.Text = "Include Z at start of Date Playlists";
+            this.includeZInDatePlaylistsCheckbox.UseVisualStyleBackColor = true;
+            this.includeZInDatePlaylistsCheckbox.CheckedChanged += new System.EventHandler(this.includeZInDatePlaylistsCheckbox_CheckedChanged);
+            // 
             // Configure
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1154, 1442);
+            this.Controls.Add(this.includeZInDatePlaylistsCheckbox);
             this.Controls.Add(this.outputTextBox);
             this.Controls.Add(this.includeFoldersInNameCheckBox);
             this.Controls.Add(this.fromGMusicRadioButton);
@@ -308,5 +323,6 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.CheckBox includeFoldersInNameCheckBox;
         private System.Windows.Forms.RichTextBox outputTextBox;
+        private System.Windows.Forms.CheckBox includeZInDatePlaylistsCheckbox;
     }
 }

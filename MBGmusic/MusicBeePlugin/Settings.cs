@@ -20,6 +20,7 @@ namespace MusicBeePlugin
             SyncOnStartup = false;
             SyncLocalToRemote = true;
             IncludeFoldersInPlaylistName = false;
+            IncludeZAtStartOfDatePlaylistName = true;
 
             PlaylistDirectory = "GMusic";
 
@@ -45,6 +46,7 @@ namespace MusicBeePlugin
         public List<String> GMusicPlaylistsToSync { get; private set; }
         public String PlaylistDirectory { get; set; }
         public Boolean IncludeFoldersInPlaylistName { get; set; }
+        public Boolean IncludeZAtStartOfDatePlaylistName { get; set; }
 
         public bool Save()
         {
