@@ -17,7 +17,6 @@ namespace MusicBeePlugin
             GMusicPlaylistsToSync = new List<String>();
 
             // defaults
-            SyncOnStartup = false;
             SyncLocalToRemote = true;
             IncludeFoldersInPlaylistName = false;
             IncludeZAtStartOfDatePlaylistName = true;
@@ -36,11 +35,6 @@ namespace MusicBeePlugin
 
         public String SettingsFile { get; set; }
 
-        public Boolean SyncOnStartup { get; set; }
-        public String AuthorizationToken { get; set; }
-        public String Password { get; set; }
-        public String Email { get; set; }
-        public Boolean SaveCredentials { get; set; }
         public Boolean SyncLocalToRemote { get; set; }
         public List<String> MBPlaylistsToSync { get; private set; }
         public List<String> GMusicPlaylistsToSync { get; private set; }

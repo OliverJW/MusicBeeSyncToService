@@ -75,15 +75,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GooglePlayMusicAPI, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\GooglePlayMusicAPI.1.4.0\lib\net452\GooglePlayMusicAPI.dll</HintPath>
-    </Reference>
     <Reference Include="Mono.HttpUtility, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.HttpUtility.1.0.0.1\lib\net40\Mono.HttpUtility.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -97,11 +90,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SyncHelpers\GMusicSyncData.cs" />
+    <Compile Include="Models\PlaylistSyncError.cs" />
     <Compile Include="MusicBeePlugin\Logger.cs" />
-    <Compile Include="SyncHelpers\MbSyncData.cs" />
-    <Compile Include="Models\MbPlaylist.cs" />
-    <Compile Include="Models\MbSong.cs" />
+    <Compile Include="Models\MusicBeePlaylist.cs" />
+    <Compile Include="Models\MusicBeeSong.cs" />
     <Compile Include="MusicBeePlugin\PlaylistSync.cs" />
     <Compile Include="MusicBeePlugin\Settings.cs" />
     <Compile Include="Views\Configure.cs">
@@ -148,6 +140,12 @@
     <EmbeddedResource Include="Views\Configure.resx">
       <DependentUpon>Configure.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\GooglePlayMusicClient\GooglePlayMusicClient\GooglePlayMusicClient.csproj">
+      <Project>{7d0a5653-e2c3-4cef-aae1-cf19d4ec3516}</Project>
+      <Name>GooglePlayMusicClient</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

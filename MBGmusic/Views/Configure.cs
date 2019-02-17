@@ -78,55 +78,10 @@ namespace MusicBeePlugin
             _settings = settings;
             _playlistSync = playlistSync;
 
-            // Register event handlers
-            _playlistSync.MBSync.OnSyncComplete = new EventHandler(MBSync_OnSyncComplete);
-
-            if (_playlistSync.GMusic.SyncRunning)
-            {
-                WriteLine("Background sync running");
-            }
-
-            if (_settings.Email != null)
-            {
-                // decode it from base64
-                byte[] email = Convert.FromBase64String(_settings.Email);
-                emailTextBox.Text = Encoding.UTF8.GetString(email);
-            }
-
-            if (_settings.Password != null)
-            {
-                byte[] passwd = Convert.FromBase64String(_settings.Password);
-                passwordTextBox.Text = Encoding.UTF8.GetString(passwd);
-            }
-
-            rememberCheckbox.Checked = _settings.SaveCredentials;
             includeFoldersInNameCheckBox.Checked = _settings.IncludeFoldersInPlaylistName;
             includeZInDatePlaylistsCheckbox.Checked = _settings.IncludeZAtStartOfDatePlaylistName;
 
-           // autoSyncCheckbox.Checked = _settings.SyncOnStartup;
-
             populateLocalPlaylists();
-
-            // tagToolsPlugin.mbForm.AddOwnedForm(this);
-        }
-
-        void MBSync_OnSyncComplete(object sender, EventArgs e)
-        {
-            this.Invoke(new MethodInvoker(delegate
-            {
-                WriteLine("Synchronisation done!");
-                populateLocalPlaylists();
-            }));
-        }
-
-        void GMusic_OnSyncComplete(object sender, EventArgs e)
-        {
-            this.Invoke(new MethodInvoker(delegate
-            {
-                WriteLine("Synchronisation done!");
-                // Just refresh the playlists (don't bother fetching all the songs again)
-                _playlistSync.GMusic.FetchPlaylists();
-            }));
         }
 
         void log_OnLogUpdated(object sender, EventArgs e)
@@ -139,55 +94,49 @@ namespace MusicBeePlugin
 
         private async void loginButton_Click(object sender, EventArgs e)
         {
-            // Save the pwd and email to disc
-            // NOTE although this encodes them as base64 (so they're not immediately obvious to anyone reading them) this is
-            // NOT SECURITY. There is no encryption. Don't check that box unless you trust your machine!
-            if (rememberCheckbox.Checked)
+            if (_playlistSync.IsLoggedInToGpm())
             {
-                _settings.SaveCredentials = true;
-                Byte[] email = Encoding.UTF8.GetBytes(emailTextBox.Text);
-                _settings.Email = Convert.ToBase64String(email);
-                Byte[] pwd = Encoding.UTF8.GetBytes(passwordTextBox.Text);
-                _settings.Password = Convert.ToBase64String(pwd);
-                _settings.Save();
-            }
-            else
-            {
-                _settings.SaveCredentials = false;
-                _settings.Email = "";
-                _settings.Password = "";
-                _settings.Save();
+                WriteLine("Already logged in.");
+                return;
             }
 
-            bool loggedIn = await _playlistSync.GMusic.LoginToGMusic(emailTextBox.Text, passwordTextBox.Text);
-
-            if (loggedIn)
+            try
             {
-                WriteLine("Successfully logged in.");
-
-                WriteLine("Fetching library.");
-                List<Track> tracks = await _playlistSync.GMusic.FetchLibrary();
-
-                WriteLine("Fetching playlists.");
-                List<Playlist> allPlaylists = await _playlistSync.GMusic.FetchPlaylists();
-
-                googleMusicPlaylistBox.Items.Clear();
-                foreach (Playlist playlist in allPlaylists)
+                bool loggedIn = await _playlistSync.LoginToGpm();
+                if (loggedIn)
                 {
-                    if (!playlist.Deleted)
-                    {
-                        if (_settings.GMusicPlaylistsToSync.Contains(playlist.Id))
-                            googleMusicPlaylistBox.Items.Add(playlist, true);
-                        else
-                            googleMusicPlaylistBox.Items.Add(playlist, false);
-                    }
-                }
+                    WriteLine("Successfully logged in.");
 
-                this.syncNowButton.Enabled = true;
+                    // Need to fetch library because currently no way to get user uploaded track other than this endpoint
+                    WriteLine("Fetching library.");
+                    List<Track> tracks = await _playlistSync.RefreshGpmLibrary();
+
+                    WriteLine("Fetching playlists.");
+                    List<Playlist> allPlaylists = await _playlistSync.FetchGPMPlaylists();
+
+                    googleMusicPlaylistBox.Items.Clear();
+                    foreach (Playlist playlist in allPlaylists)
+                    {
+                        if (!playlist.Deleted)
+                        {
+                            if (_settings.GMusicPlaylistsToSync.Contains(playlist.Id))
+                                googleMusicPlaylistBox.Items.Add(playlist, true);
+                            else
+                                googleMusicPlaylistBox.Items.Add(playlist, false);
+                        }
+                    }
+
+                    this.syncNowButton.Enabled = true;
+                }
+                else
+                {
+                    WriteLine("Login failed. Please try again.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                WriteLine("LOGIN FAILED. PLEASE TRY AGAIN");
+                WriteLine($"Exception encountered: {ex.Message}");
+                WriteLine(ex.StackTrace);
             }
         }
 
@@ -195,9 +144,9 @@ namespace MusicBeePlugin
         // Check the settings to see if they're currently syncable
         private void populateLocalPlaylists()
         {
-            List<MbPlaylist> mbPlaylists = _playlistSync.MBSync.GetMbPlaylists();
+            List<MusicBeePlaylist> mbPlaylists = _playlistSync.GetMbPlaylists();
             localPlaylistBox.Items.Clear();
-            foreach (MbPlaylist mbPlaylist in mbPlaylists)
+            foreach (MusicBeePlaylist mbPlaylist in mbPlaylists)
             {
                 if (_settings.MBPlaylistsToSync.Contains(mbPlaylist.mbName))
                      localPlaylistBox.Items.Add(mbPlaylist, true);
@@ -207,47 +156,41 @@ namespace MusicBeePlugin
 
         }
 
-        /*
-        private void autoSyncCheckbox_CheckedChanged(object sender, EventArgs e)
-        {
-            _settings.SyncOnStartup = autoSyncCheckbox.Checked;
-            _settings.Save();
-        }*/
-
         // Depending on user settings, either start a local sync to remote, or start a remote sync to local
         private async void syncNowButton_Click(object sender, EventArgs e)
         {
             // Make sure we're logged in and have playlists, otherwise stop
-            if (!_playlistSync.GMusic.LoggedIn)
+            if (!_playlistSync.IsLoggedInToGpm())
             {
-                WriteLine("Error: NOT LOGGED IN");
+                WriteLine("Login to be able to sync.");
                 return;
             }
 
-            if (!_playlistSync.GMusic.DataFetched)
-            {
-                WriteLine("Please fetch data before attempting to sync.");
-                return;
-            }
+            this.syncNowButton.Enabled = false;
 
             WriteLine("Now synchronising. Please wait.");
 
-            List<MbPlaylist> mbPlaylists = getMbPlaylistsToSync();
+            List<MusicBeePlaylist> mbPlaylists = getMbPlaylistsToSync();
             List<Playlist> gmusicPlaylists = getGMusicPlaylistToSync();
-            bool result = await _playlistSync.SyncPlaylists(mbPlaylists, gmusicPlaylists);
+            List<IPlaylistSyncError> result = await _playlistSync.SyncPlaylists(mbPlaylists, gmusicPlaylists);
 
-            WriteLine(result ? "Synchronize success." : "Error during synchronizing");
+            if (result == null || result.Count == 0)
+            {
+                WriteLine("Synchronize success.");
+            }
+            else
+            {
+                WriteLine("Errors during sync:");
+                result.ForEach((err) => WriteLine(err.GetMessage()));
+            }
 
-            //                List<GMusicPlaylist> selected = new List<GMusicPlaylist>();
-            //foreach (GMusicPlaylist selectedPlaylist in googleMusicPlaylistBox.CheckedItems)
-             //   selected.Add(selectedPlaylist);
-
+            this.syncNowButton.Enabled = true;
         }
 
-        private List<MbPlaylist> getMbPlaylistsToSync()
+        private List<MusicBeePlaylist> getMbPlaylistsToSync()
         {
-            List<MbPlaylist> result = new List<MbPlaylist>();
-            foreach (MbPlaylist playlist in localPlaylistBox.CheckedItems)
+            List<MusicBeePlaylist> result = new List<MusicBeePlaylist>();
+            foreach (MusicBeePlaylist playlist in localPlaylistBox.CheckedItems)
             {
                 result.Add(playlist);
             }
@@ -337,7 +280,7 @@ namespace MusicBeePlugin
         private void saveLocalPlaylistSettings()
         {
             _settings.MBPlaylistsToSync.Clear();
-            foreach (MbPlaylist playlist in localPlaylistBox.CheckedItems)
+            foreach (MusicBeePlaylist playlist in localPlaylistBox.CheckedItems)
             {
                 _settings.MBPlaylistsToSync.Add(playlist.mbName);
             }

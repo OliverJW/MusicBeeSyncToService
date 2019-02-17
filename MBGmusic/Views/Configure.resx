@@ -117,4 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <metadata name="zAtDatePlaylistToolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>17, 17</value>
+  </metadata>
+  <data name="includeZInDatePlaylistsCheckbox.ToolTip" xml:space="preserve">
+    <value>This is a super custom feature for the author of the plugin. Check this if you have playlists that have names starting with numbers and when syncing to Google Play you want to preface the playlist with a Z</value>
+  </data>
 </root>

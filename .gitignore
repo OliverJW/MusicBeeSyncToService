@@ -224,3 +224,5 @@ pip-log.txt
 /GooglePlayMusicClient/GooglePlayMusicAPI.1.0.1.nupkg
 /GooglePlayMusicClient/GooglePlayMusicAPI.1.0.0.nupkg
 *.ide
+
+.vs/*

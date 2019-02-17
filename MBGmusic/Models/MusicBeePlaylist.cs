@@ -5,16 +5,13 @@ using System.Text;
 
 namespace MusicBeePlugin.Models
 {
-    public class MbSong
+    public class MusicBeePlaylist
     {
-        public String Filename;
-        public String Artist;
-        public String Title;
-
+        public String mbName;
+        public String Name;
         public override string ToString()
         {
-            return Artist + " - " + Title;
+            return Name;
         }
-
     }
 }

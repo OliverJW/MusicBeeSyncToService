@@ -1,7 +1,7 @@
 MusicBee to Google Music Playlist Sync
 ======================================
 
-This is a [MusicBee](http://getmusicbee.com) plugin  designed to allow users to synchronise their local playlists to Google Play and a .NET API for the Google Play Music website.
+This is a [MusicBee](http://getmusicbee.com) plugin  designed to allow users to synchronise their local playlists to Google Play.
 
 Warning
 -------
@@ -19,7 +19,6 @@ To just use the plugin, download the built DLLs from the "Plugin" directory. Pla
 
 In MusicBee, Preferences -> Plugins, enable and click "Configure". 
 
-Enter your login details in the box, select to Remember Login and click "Login". The text below the email box will indicate if you've been successful.
 
 The plugin attempts to fetch your Google Music library and playlists after logging in. If you have a big library, this might take a while. Once fetched, Google Music playlists will be shown in the right hand box.
 
@@ -29,7 +28,7 @@ To synchronise your MusicBee playlists to Google Music, select the playlists you
 
 On logging in the plugin fetches a full list of songs and playlists tied to your Google Music account. It goes through each local playlist you wish to synchronise and looks for a playlist with the same name on Google Music. If it finds one, it deletes it and then creates a new playlist with the local playlist's name. For each song in the local playlist, the plugin attempts to match it with a remote song. Songs it can find remote matches for are placed into the new playlist in order. It silently skips those it can't match.
 
-When synchronising Remote to local, it checks for a local playlist with the same name as the remote one. If it exists, then it deletes the .m3u file that playlist is contained in, and recreates it as a blank text file. If it doesn't exist, it creates a new playlist with that name. It then attempts to match each song in the remote playlist with a song in the local library. If it finds a match, it adds it to the new playlist, otherwise it skips that song silently.
+When synchronising Remote to local, it checks for a local playlist with the same name as the remote one. If it exists, then it deletes playlist before creating a new playlist with that name. It then attempts to match each song in the remote playlist with a song in the local library. If it finds a match, it adds it to the new playlist, otherwise it will display a message indicating which song couldn't be found.
 
 ### Limitations
 
