@@ -26,12 +26,12 @@ namespace MusicBeePlugin
             about.PluginInfoVersion = PluginInfoVersion;
             about.Name = "Google Music Sync";
             about.Description = "Sync your playlists to Google Play Music.";
-            about.Author = "Leo Rampen";
+            about.Author = "Mitch Hymel";
             about.TargetApplication = "None";   // current only applies to artwork, lyrics or instant messenger name that appears in the provider drop down selector or target Instant Messenger
             about.Type = PluginType.General;
-            about.VersionMajor = 1;  // your plugin version
-            about.VersionMinor = 7;
-            about.Revision = 1;
+            about.VersionMajor = 2;  // your plugin version
+            about.VersionMinor = 0;
+            about.Revision = 0;
             about.MinInterfaceVersion = MinInterfaceVersion;
             about.MinApiRevision = MinApiRevision;
             about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
