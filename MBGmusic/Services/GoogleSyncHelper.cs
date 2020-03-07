@@ -1,116 +1,61 @@
-﻿using System;
+﻿using GooglePlayMusicAPI;
+using GooglePlayMusicAPI.Models.GooglePlayMusicModels;
+using GooglePlayMusicAPI.Models.RequestModels;
+using MusicBeePlugin.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MusicBeePlugin.Models;
-using System.Threading;
-using GooglePlayMusicAPI;
 using System.Threading.Tasks;
-using GooglePlayMusicAPI.Models.GooglePlayMusicModels;
-using GooglePlayMusicAPI.Models.RequestModels;
-using System.IO;
-using static MusicBeePlugin.Services.GoogleSyncHelper;
 
-namespace MusicBeePlugin
+namespace MusicBeePlugin.Services
 {
-    class PlaylistSync
+    public class GoogleSyncHelper
     {
-        private Logger log;
-
-        private Settings _settings;
-
-        private Plugin.MusicBeeApiInterface _mbApiInterface;
-
-        public PlaylistSync(Settings settings, Plugin.MusicBeeApiInterface mbApiInterface)
-        {
-            _settings = settings;
-
-            _mbApiInterface = mbApiInterface;
-
-            log = Logger.Instance;
-
-            GpmPlaylists = new List<Playlist>();
-            GpmSongsFetched = new List<Track>();
-
-            MbSongs = GetMbSongs();
-            MbPlaylists = GetMbPlaylists();
-        }
-
-
-        private bool SyncRunning = false;
-
         private GooglePlayMusicClient api = new GooglePlayMusicClient("MusicBeeGMusicSync");
-        public List<Playlist> GpmPlaylists { get; set; }
-        public List<Track> GpmSongsFetched { get; set; }
-
-        List<MusicBeePlaylist> MbPlaylists { get; set; }
-        List<MusicBeeSong> MbSongs { get; set; }
-
-
-        public async Task<List<IPlaylistSyncError>> SyncPlaylists(List<MusicBeePlaylist> mbPlaylists, List<Playlist> gmusicPlaylists)
+        public List<Playlist> GooglePlaylists { get; set; } = new List<Playlist>();
+        public List<Track> GoogleSongsFetched { get; set; } = new List<Track>();
+        public async Task<bool> Login()
         {
-            List<IPlaylistSyncError> errors = new List<IPlaylistSyncError>();
-
-            if (!IsLoggedInToGpm() || SyncRunning)
-                return errors;
-
-            if (_settings.SyncLocalToRemote)
-            {
-                errors = await SyncPlaylistsToGMusic(mbPlaylists);
-            }
-            else
-            {
-                errors = await SyncPlaylistsToMusicBee(gmusicPlaylists);
-            }
-
-            return errors;
+            return await api.LoginAsync();
         }
 
-
-        #region Google Play Music methods
-
-        public async Task<bool> LoginToGpm()
-        {
-            bool result = await api.LoginAsync();
-            return result;
-        }
-
-        public bool IsLoggedInToGpm()
+        public bool IsLoggedIn()
         {
             return api.LoggedIn();
         }
 
-        public async Task<List<Playlist>> FetchGPMPlaylists(bool fetchSongs=false)
+        public async Task<List<Playlist>> FetchPlaylists(bool fetchSongs = false)
         {
-            GpmPlaylists = await api.GetPlaylistsWithEntriesAsync();
-            if (GpmPlaylists.Count > 0)
+            GooglePlaylists = await api.GetPlaylistsWithEntriesAsync();
+            if (GooglePlaylists.Count > 0)
             {
-                GpmPlaylists = GpmPlaylists.OrderBy(p => p.Name).ToList();
+                GooglePlaylists = GooglePlaylists.OrderBy(p => p.Name).ToList();
             }
 
             if (fetchSongs)
             {
                 // get songs that are in GMusic playlists but not in GMusic library
-                foreach (Playlist playlist in GpmPlaylists)
+                foreach (Playlist playlist in GooglePlaylists)
                 {
                     foreach (PlaylistEntry entry in playlist.Songs)
                     {
-                        if (GpmSongsFetched.FirstOrDefault(t => t.Id == entry.TrackID || t.NID == entry.TrackID) == null)
+                        if (GoogleSongsFetched.FirstOrDefault(t => t.Id == entry.TrackID || t.NID == entry.TrackID) == null)
                         {
                             Track track = await api.GetTrackAsync(entry.TrackID);
-                            GpmSongsFetched.Add(track);
+                            GoogleSongsFetched.Add(track);
                         }
                     }
                 }
             }
 
-            return GpmPlaylists;
+            return GooglePlaylists;
         }
 
-        public async Task<List<Track>> RefreshGpmLibrary()
+        public async Task<List<Track>> RefreshLibrary()
         {
-            GpmSongsFetched = await api.GetLibraryAsync();
-            return GpmSongsFetched;
+            GoogleSongsFetched = await api.GetLibraryAsync();
+            return GoogleSongsFetched;
         }
 
         public async Task<Track> TryGetTrackAsync(String artist, String title, String album)
@@ -126,10 +71,9 @@ namespace MusicBeePlugin
             return null;
         }
 
-        public async Task<List<IPlaylistSyncError>> SyncPlaylistsToGMusic(List<MusicBeePlaylist> mbPlaylistsToSync)
+        public async Task<List<IPlaylistSyncError>> SyncPlaylistsToGMusic(MusicBeeSyncHelper mb, List<MusicBeePlaylist> mbPlaylistsToSync, 
+            bool includeFoldersInPlaylistName=false, bool includeZAtStartOfDatePlaylistName=true)
         {
-            SyncRunning = true;
-
             List<IPlaylistSyncError> errors = new List<IPlaylistSyncError>();
 
             foreach (MusicBeePlaylist playlist in mbPlaylistsToSync)
@@ -139,7 +83,7 @@ namespace MusicBeePlugin
                 // Unless it's been deleted, in which case pretend it doesn't exist.
                 // I'm not sure how to undelete a playlist, or even if you can
                 string gpmPlaylistName = null;
-                if (_settings.IncludeFoldersInPlaylistName)
+                if (includeFoldersInPlaylistName)
                 {
                     gpmPlaylistName = playlist.Name;
                 }
@@ -148,7 +92,7 @@ namespace MusicBeePlugin
                     gpmPlaylistName = playlist.Name.Split('\\').Last();
                 }
 
-                if (_settings.IncludeZAtStartOfDatePlaylistName)
+                if (includeZAtStartOfDatePlaylistName)
                 {
                     // if it starts with a 2, it's a date playlist
                     if (gpmPlaylistName.StartsWith("2"))
@@ -157,7 +101,7 @@ namespace MusicBeePlugin
                     }
                 }
 
-                Playlist thisPlaylist = GpmPlaylists.FirstOrDefault(p => p.Name == gpmPlaylistName && p.Deleted == false);
+                Playlist thisPlaylist = GooglePlaylists.FirstOrDefault(p => p.Name == gpmPlaylistName && p.Deleted == false);
                 String thisPlaylistID = "";
                 if (thisPlaylist != null)
                 {
@@ -177,9 +121,9 @@ namespace MusicBeePlugin
 
                 // Create a list of files based on the MB Playlist
                 string[] playlistFiles = null;
-                if (_mbApiInterface.Playlist_QueryFiles(playlist.mbName))
+                if (mb.MbApiInterface.Playlist_QueryFiles(playlist.mbName))
                 {
-                    bool success = _mbApiInterface.Playlist_QueryFilesEx(playlist.mbName, ref playlistFiles);
+                    bool success = mb.MbApiInterface.Playlist_QueryFilesEx(playlist.mbName, ref playlistFiles);
                     if (!success)
                         throw new Exception("Couldn't get playlist files");
                 }
@@ -192,15 +136,15 @@ namespace MusicBeePlugin
                 // And get the title and artist of each file, and add it to the GMusic playlist
                 foreach (string file in playlistFiles)
                 {
-                    string title = _mbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.TrackTitle);
-                    string artist = _mbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.Artist);
-                    string album = _mbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.Album);
+                    string title = mb.MbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.TrackTitle);
+                    string artist = mb.MbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.Artist);
+                    string album = mb.MbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.Album);
 
                     // First check for matching title, artist, album, if we find nothing, then check for matching title/artist
-                    Track gSong = GpmSongsFetched.FirstOrDefault(item => (item.Artist == artist && item.Title == title && item.Album == album));
+                    Track gSong = GoogleSongsFetched.FirstOrDefault(item => (item.Artist == artist && item.Title == title && item.Album == album));
                     if (gSong == null)
                     {
-                        gSong = GpmSongsFetched.FirstOrDefault(item => (item.Artist == artist && item.Title == title));
+                        gSong = GoogleSongsFetched.FirstOrDefault(item => (item.Artist == artist && item.Title == title));
                         if (gSong != null)
                         {
                             songsToAdd.Add(gSong);
@@ -211,7 +155,7 @@ namespace MusicBeePlugin
                             Track result = await TryGetTrackAsync(artist, title, album);
                             if (result != null)
                             {
-                                GpmSongsFetched.Add(result);
+                                GoogleSongsFetched.Add(result);
                                 songsToAdd.Add(result);
                             }
                             else
@@ -237,83 +181,27 @@ namespace MusicBeePlugin
                 await api.AddToPlaylistAsync(thisPlaylistID, songsToAdd);
             }
 
-            SyncRunning = false;
-
             return errors;
         }
 
-        #endregion
-
-        #region MusicBee methods
-
-        public List<MusicBeePlaylist> GetMbPlaylists()
-        {
-            List<MusicBeePlaylist> MbPlaylists = new List<MusicBeePlaylist>();
-            _mbApiInterface.Playlist_QueryPlaylists();
-            string playlist = _mbApiInterface.Playlist_QueryGetNextPlaylist();
-            while (playlist != null)
-            {
-                string playlistName = _mbApiInterface.Playlist_GetName(playlist);
-                MusicBeePlaylist MbPlaylist = new MusicBeePlaylist();
-                MbPlaylist.mbName = playlist;
-                MbPlaylist.Name = playlistName;
-
-                MbPlaylists.Add(MbPlaylist);
-
-                // Query the next mbPlaylist to start again
-                playlist = _mbApiInterface.Playlist_QueryGetNextPlaylist();
-            }
-
-            MbPlaylists = MbPlaylists.OrderBy(p => p.Name).ToList();
-            return MbPlaylists;
-        }
-
-        public List<MusicBeeSong> GetMbSongs()
-        {
-            string[] files = null;
-            List<MusicBeeSong> allMbSongs = new List<MusicBeeSong>();
-
-            if (_mbApiInterface.Library_QueryFiles("domain=library"))
-            {
-                // Old (deprecated)
-                //public char[] filesSeparators = { '\0' };
-                //files = _mbApiInterface.Library_QueryGetAllFiles().Split(filesSeparators, StringSplitOptions.RemoveEmptyEntries);
-                _mbApiInterface.Library_QueryFilesEx("domain=library", ref files);
-            }
-            else
-            {
-                files = new string[0];
-            }
-
-            foreach (string path in files)
-            {
-                MusicBeeSong thisSong = new MusicBeeSong();
-                thisSong.Filename = path;
-                thisSong.Artist = _mbApiInterface.Library_GetFileTag(path, Plugin.MetaDataType.Artist);
-                thisSong.Title = _mbApiInterface.Library_GetFileTag(path, Plugin.MetaDataType.TrackTitle);
-                allMbSongs.Add(thisSong);
-            }
-            return allMbSongs;
-        }
-
-        public async Task<List<IPlaylistSyncError>> SyncPlaylistsToMusicBee(List<Playlist> playlists)
+        public async Task<List<IPlaylistSyncError>> SyncPlaylistsToMusicBee(MusicBeeSyncHelper mb, List<Playlist> playlists)
         {
             List<IPlaylistSyncError> errors = new List<IPlaylistSyncError>();
 
             // Get the absolute path to the root of playlist dir
             // We do this by creating a blank playlist and seeing where it was created
             string tempPlaylistName = "mbsynctempplaylist";
-            _mbApiInterface.Playlist_CreatePlaylist("", tempPlaylistName, new string[] { });
+            mb.MbApiInterface.Playlist_CreatePlaylist("", tempPlaylistName, new string[] { });
 
             // Refresh Mb playlists after making temp playlist
-            MbPlaylists = GetMbPlaylists();
+            mb.RefreshMusicBeePlaylists();
 
             // Find the root dir from the temp playlist
             // clean up temp playlist
-            MusicBeePlaylist tempPlaylist = MbPlaylists.FirstOrDefault(x => x.Name == tempPlaylistName);
+            MusicBeePlaylist tempPlaylist = mb.Playlists.FirstOrDefault(x => x.Name == tempPlaylistName);
             string[] tempPlaylistPathSplit = tempPlaylist.mbName.Split('\\');
             string musicBeePlaylistRootDir = String.Join("\\", tempPlaylistPathSplit.Take(tempPlaylistPathSplit.Length - 1).ToArray());
-            _mbApiInterface.Playlist_DeletePlaylist(tempPlaylist.mbName);
+            mb.MbApiInterface.Playlist_DeletePlaylist(tempPlaylist.mbName);
 
             // Go through each playlist we want to sync in turn
             foreach (Playlist playlist in playlists)
@@ -326,7 +214,7 @@ namespace MusicBeePlugin
                 // If we find it, add it to the list of local songs
                 foreach (PlaylistEntry entry in playlist.Songs)
                 {
-                    Track thisSong = GpmSongsFetched.FirstOrDefault(s => s.Id == entry.TrackID || s.NID == entry.TrackID);
+                    Track thisSong = GoogleSongsFetched.FirstOrDefault(s => s.Id == entry.TrackID || s.NID == entry.TrackID);
 
                     // if we couldn't find it, attempt to fetch it by trackID
                     if (thisSong == null)
@@ -344,13 +232,13 @@ namespace MusicBeePlugin
                         }
                         else
                         {
-                            GpmSongsFetched.Add(thisSong);
+                            GoogleSongsFetched.Add(thisSong);
                         }
                     }
 
                     if (thisSong != null)
                     {
-                        MusicBeeSong thisMbSong = MbSongs.FirstOrDefault(s => s.Artist == thisSong.Artist && s.Title == thisSong.Title);
+                        MusicBeeSong thisMbSong = mb.Songs.FirstOrDefault(s => s.Artist == thisSong.Artist && s.Title == thisSong.Title);
                         if (thisMbSong != null)
                         {
                             mbPlaylistSongs.Add(thisMbSong);
@@ -379,10 +267,10 @@ namespace MusicBeePlugin
                 }
 
                 // Now we need to delete any existing playlist with matching name
-                MusicBeePlaylist localPlaylist = MbPlaylists.FirstOrDefault(p => p.Name == playlist.Name);
+                MusicBeePlaylist localPlaylist = mb.Playlists.FirstOrDefault(p => p.Name == playlist.Name);
                 if (localPlaylist != null)
                 {
-                    _mbApiInterface.Playlist_DeletePlaylist(localPlaylist.mbName);
+                    mb.MbApiInterface.Playlist_DeletePlaylist(localPlaylist.mbName);
                 }
 
                 // Create the playlist locally
@@ -399,18 +287,45 @@ namespace MusicBeePlugin
                 if (itemsInPath.Length > 1)
                 {
                     // Creates a playlist at top level directory
-                    _mbApiInterface.Playlist_CreatePlaylist("", playlistName, mbPlaylistSongFiles);
+                    mb.MbApiInterface.Playlist_CreatePlaylist("", playlistName, mbPlaylistSongFiles);
                 }
 
-                _mbApiInterface.Playlist_CreatePlaylist(playlistRelativeDir, playlistName, mbPlaylistSongFiles);
+                mb.MbApiInterface.Playlist_CreatePlaylist(playlistRelativeDir, playlistName, mbPlaylistSongFiles);
             }
 
             // Get the local playlists again
-            MbPlaylists = GetMbPlaylists();
+            mb.RefreshMusicBeePlaylists();
 
             return errors;
         }
 
-        #endregion
+        public class UnableToFindGooglePlaylistEntryError : IPlaylistSyncError
+        {
+            public string GpmTrackId { get; set; }
+            public string GpmPlaylistPosition { get; set; }
+            public string GpmPlaylistName { get; set; }
+
+            public string GetMessage()
+            {
+                return $"For entry \"{GpmPlaylistPosition}\" of Google Play playlist \"{GpmPlaylistName}\", couldn't find track in Google Play with track id of \"{GpmTrackId}\"";
+            }
+        }
+
+        public class UnableToFindGoogleTrackError : IPlaylistSyncError
+        {
+            public string PlaylistName { get; set; }
+            public string TrackName { get; set; }
+            public string ArtistName { get; set; }
+            public string AlbumName { get; set; }
+            public bool IsGpmTrack { get; set; }
+
+            public string GetMessage()
+            {
+                string locationStr = IsGpmTrack ? "on Google Play" : "in your MusicBee library";
+                return $"For playlist \"{PlaylistName}\", couldn't find \"{TrackName}\" from \"{AlbumName}\" by \"{ArtistName}\" {locationStr}";
+            }
+        }
+
+
     }
 }

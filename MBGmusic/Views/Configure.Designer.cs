@@ -45,12 +45,17 @@
             this.outputTextBox = new System.Windows.Forms.RichTextBox();
             this.includeZInDatePlaylistsCheckbox = new System.Windows.Forms.CheckBox();
             this.zAtDatePlaylistToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.gpmTab = new System.Windows.Forms.TabControl();
+            this.GoogleTab = new System.Windows.Forms.TabPage();
+            this.SpotifyTab = new System.Windows.Forms.TabPage();
             this.groupBox1.SuspendLayout();
+            this.gpmTab.SuspendLayout();
+            this.GoogleTab.SuspendLayout();
             this.SuspendLayout();
             // 
             // loginButton
             // 
-            this.loginButton.Location = new System.Drawing.Point(27, 15);
+            this.loginButton.Location = new System.Drawing.Point(9, 42);
             this.loginButton.Margin = new System.Windows.Forms.Padding(6);
             this.loginButton.Name = "loginButton";
             this.loginButton.Size = new System.Drawing.Size(284, 44);
@@ -62,7 +67,7 @@
             // syncNowButton
             // 
             this.syncNowButton.Enabled = false;
-            this.syncNowButton.Location = new System.Drawing.Point(849, 15);
+            this.syncNowButton.Location = new System.Drawing.Point(831, 42);
             this.syncNowButton.Margin = new System.Windows.Forms.Padding(6);
             this.syncNowButton.Name = "syncNowButton";
             this.syncNowButton.Size = new System.Drawing.Size(284, 44);
@@ -78,7 +83,7 @@
             this.localPlaylistBox.Location = new System.Drawing.Point(12, 88);
             this.localPlaylistBox.Margin = new System.Windows.Forms.Padding(6);
             this.localPlaylistBox.Name = "localPlaylistBox";
-            this.localPlaylistBox.Size = new System.Drawing.Size(526, 680);
+            this.localPlaylistBox.Size = new System.Drawing.Size(526, 676);
             this.localPlaylistBox.TabIndex = 11;
             this.localPlaylistBox.SelectedIndexChanged += new System.EventHandler(this.localPlaylistBox_SelectedIndexChanged);
             // 
@@ -89,7 +94,7 @@
             this.googleMusicPlaylistBox.Location = new System.Drawing.Point(564, 88);
             this.googleMusicPlaylistBox.Margin = new System.Windows.Forms.Padding(6);
             this.googleMusicPlaylistBox.Name = "googleMusicPlaylistBox";
-            this.googleMusicPlaylistBox.Size = new System.Drawing.Size(526, 680);
+            this.googleMusicPlaylistBox.Size = new System.Drawing.Size(526, 676);
             this.googleMusicPlaylistBox.TabIndex = 12;
             this.googleMusicPlaylistBox.SelectedIndexChanged += new System.EventHandler(this.googleMusicPlaylistBox_SelectedIndexChanged);
             // 
@@ -141,7 +146,7 @@
             // 
             this.toGMusicRadiobutton.AutoSize = true;
             this.toGMusicRadiobutton.Checked = true;
-            this.toGMusicRadiobutton.Location = new System.Drawing.Point(27, 83);
+            this.toGMusicRadiobutton.Location = new System.Drawing.Point(9, 110);
             this.toGMusicRadiobutton.Margin = new System.Windows.Forms.Padding(6);
             this.toGMusicRadiobutton.Name = "toGMusicRadiobutton";
             this.toGMusicRadiobutton.Size = new System.Drawing.Size(231, 29);
@@ -154,7 +159,7 @@
             // fromGMusicRadioButton
             // 
             this.fromGMusicRadioButton.AutoSize = true;
-            this.fromGMusicRadioButton.Location = new System.Drawing.Point(27, 124);
+            this.fromGMusicRadioButton.Location = new System.Drawing.Point(9, 151);
             this.fromGMusicRadioButton.Margin = new System.Windows.Forms.Padding(6);
             this.fromGMusicRadioButton.Name = "fromGMusicRadioButton";
             this.fromGMusicRadioButton.Size = new System.Drawing.Size(255, 29);
@@ -171,7 +176,7 @@
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.allRemotePlayCheckbox);
             this.groupBox1.Controls.Add(this.googleMusicPlaylistBox);
-            this.groupBox1.Location = new System.Drawing.Point(27, 165);
+            this.groupBox1.Location = new System.Drawing.Point(9, 192);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(6);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(6);
@@ -183,7 +188,7 @@
             // includeFoldersInNameCheckBox
             // 
             this.includeFoldersInNameCheckBox.AutoSize = true;
-            this.includeFoldersInNameCheckBox.Location = new System.Drawing.Point(300, 83);
+            this.includeFoldersInNameCheckBox.Location = new System.Drawing.Point(282, 110);
             this.includeFoldersInNameCheckBox.Name = "includeFoldersInNameCheckBox";
             this.includeFoldersInNameCheckBox.Size = new System.Drawing.Size(351, 29);
             this.includeFoldersInNameCheckBox.TabIndex = 22;
@@ -193,9 +198,9 @@
             // 
             // outputTextBox
             // 
-            this.outputTextBox.Location = new System.Drawing.Point(27, 962);
+            this.outputTextBox.Location = new System.Drawing.Point(12, 1058);
             this.outputTextBox.Name = "outputTextBox";
-            this.outputTextBox.Size = new System.Drawing.Size(1106, 468);
+            this.outputTextBox.Size = new System.Drawing.Size(1146, 468);
             this.outputTextBox.TabIndex = 23;
             this.outputTextBox.Text = "";
             // 
@@ -204,7 +209,7 @@
             this.includeZInDatePlaylistsCheckbox.AutoSize = true;
             this.includeZInDatePlaylistsCheckbox.Checked = true;
             this.includeZInDatePlaylistsCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.includeZInDatePlaylistsCheckbox.Location = new System.Drawing.Point(300, 125);
+            this.includeZInDatePlaylistsCheckbox.Location = new System.Drawing.Point(282, 152);
             this.includeZInDatePlaylistsCheckbox.Name = "includeZInDatePlaylistsCheckbox";
             this.includeZInDatePlaylistsCheckbox.Size = new System.Drawing.Size(365, 29);
             this.includeZInDatePlaylistsCheckbox.TabIndex = 24;
@@ -213,27 +218,60 @@
             this.includeZInDatePlaylistsCheckbox.UseVisualStyleBackColor = true;
             this.includeZInDatePlaylistsCheckbox.CheckedChanged += new System.EventHandler(this.includeZInDatePlaylistsCheckbox_CheckedChanged);
             // 
+            // gpmTab
+            // 
+            this.gpmTab.Controls.Add(this.GoogleTab);
+            this.gpmTab.Controls.Add(this.SpotifyTab);
+            this.gpmTab.Location = new System.Drawing.Point(12, 12);
+            this.gpmTab.Name = "gpmTab";
+            this.gpmTab.SelectedIndex = 0;
+            this.gpmTab.Size = new System.Drawing.Size(1146, 1040);
+            this.gpmTab.TabIndex = 25;
+            // 
+            // GoogleTab
+            // 
+            this.GoogleTab.Controls.Add(this.loginButton);
+            this.GoogleTab.Controls.Add(this.includeZInDatePlaylistsCheckbox);
+            this.GoogleTab.Controls.Add(this.groupBox1);
+            this.GoogleTab.Controls.Add(this.syncNowButton);
+            this.GoogleTab.Controls.Add(this.includeFoldersInNameCheckBox);
+            this.GoogleTab.Controls.Add(this.toGMusicRadiobutton);
+            this.GoogleTab.Controls.Add(this.fromGMusicRadioButton);
+            this.GoogleTab.Location = new System.Drawing.Point(8, 39);
+            this.GoogleTab.Name = "GoogleTab";
+            this.GoogleTab.Padding = new System.Windows.Forms.Padding(3);
+            this.GoogleTab.Size = new System.Drawing.Size(1130, 993);
+            this.GoogleTab.TabIndex = 0;
+            this.GoogleTab.Text = "Google";
+            this.GoogleTab.UseVisualStyleBackColor = true;
+            // 
+            // SpotifyTab
+            // 
+            this.SpotifyTab.Location = new System.Drawing.Point(8, 39);
+            this.SpotifyTab.Name = "SpotifyTab";
+            this.SpotifyTab.Padding = new System.Windows.Forms.Padding(3);
+            this.SpotifyTab.Size = new System.Drawing.Size(1130, 993);
+            this.SpotifyTab.TabIndex = 1;
+            this.SpotifyTab.Text = "Spotify";
+            this.SpotifyTab.UseVisualStyleBackColor = true;
+            // 
             // Configure
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1170, 1442);
-            this.Controls.Add(this.includeZInDatePlaylistsCheckbox);
+            this.ClientSize = new System.Drawing.Size(1170, 1538);
+            this.Controls.Add(this.gpmTab);
             this.Controls.Add(this.outputTextBox);
-            this.Controls.Add(this.includeFoldersInNameCheckBox);
-            this.Controls.Add(this.fromGMusicRadioButton);
-            this.Controls.Add(this.toGMusicRadiobutton);
-            this.Controls.Add(this.syncNowButton);
-            this.Controls.Add(this.loginButton);
-            this.Controls.Add(this.groupBox1);
             this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "Configure";
             this.Text = "Google Music Sync";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Configure_FormClosing);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.gpmTab.ResumeLayout(false);
+            this.GoogleTab.ResumeLayout(false);
+            this.GoogleTab.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -254,5 +292,8 @@
         private System.Windows.Forms.RichTextBox outputTextBox;
         private System.Windows.Forms.CheckBox includeZInDatePlaylistsCheckbox;
         private System.Windows.Forms.ToolTip zAtDatePlaylistToolTip;
+        private System.Windows.Forms.TabControl gpmTab;
+        private System.Windows.Forms.TabPage GoogleTab;
+        private System.Windows.Forms.TabPage SpotifyTab;
     }
 }

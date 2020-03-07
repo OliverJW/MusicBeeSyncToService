@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.IO;
 using System.Text;
+using MBSyncToServiceUI;
 
 namespace MusicBeePlugin
 {
@@ -59,6 +60,7 @@ namespace MusicBeePlugin
         private Settings _settings;
         private PlaylistSync _playlistSync;
         Configure _configureForm;
+        MainWindow Window;
 
         public bool Configure(IntPtr panelHandle)
         {
@@ -80,15 +82,25 @@ namespace MusicBeePlugin
         private void onMenuItemClick(object sender, EventArgs e)
         {
             Logger.Instance.DebugLog("Opening config window");
-            if (_configureForm != null)
+            //if (_configureForm != null)
+            //{
+            //    _configureForm.Dispose();
+            //    _configureForm = null;
+            //}
+
+            //_configureForm = new Configure(_playlistSync, _settings, mbApiInterface);
+
+            //_configureForm.Show();
+
+            if (Window == null || !Window.IsVisible)
             {
-                _configureForm.Dispose();
-                _configureForm = null;
+                Window = new MainWindow(mbApiInterface);
+                Window.Show();
             }
-
-            _configureForm = new Configure(_playlistSync, _settings, mbApiInterface);
-
-            _configureForm.Show();
+            else
+            {
+                Window.Activate();
+            }
         }
 
         // called by MusicBee when the user clicks Apply or Save in the MusicBee Preferences screen.

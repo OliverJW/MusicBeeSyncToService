@@ -4,14 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MusicBeePlugin.Models
+namespace MusicBeePlugin.Services
 {
-    public interface IPlaylistSyncError
+    public class SpotifySyncHelper
     {
-        string GetMessage();
     }
-
-
-    
-
 }
