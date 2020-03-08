@@ -71,7 +71,7 @@ namespace MusicBeePlugin.Services
             return null;
         }
 
-        public async Task<List<IPlaylistSyncError>> SyncPlaylistsToGMusic(MusicBeeSyncHelper mb, List<MusicBeePlaylist> mbPlaylistsToSync, 
+        public async Task<List<IPlaylistSyncError>> SyncToGoogle(MusicBeeSyncHelper mb, List<MusicBeePlaylist> mbPlaylistsToSync, 
             bool includeFoldersInPlaylistName=false, bool includeZAtStartOfDatePlaylistName=true)
         {
             List<IPlaylistSyncError> errors = new List<IPlaylistSyncError>();
@@ -141,10 +141,10 @@ namespace MusicBeePlugin.Services
                     string album = mb.MbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.Album);
 
                     // First check for matching title, artist, album, if we find nothing, then check for matching title/artist
-                    Track gSong = GoogleSongsFetched.FirstOrDefault(item => (item.Artist == artist && item.Title == title && item.Album == album));
+                    Track gSong = GoogleSongsFetched.FirstOrDefault(item => (item.Artist.ToLower() == artist.ToLower() && item.Title.ToLower() == title.ToLower() && item.Album.ToLower() == album.ToLower()));
                     if (gSong == null)
                     {
-                        gSong = GoogleSongsFetched.FirstOrDefault(item => (item.Artist == artist && item.Title == title));
+                        gSong = GoogleSongsFetched.FirstOrDefault(item => (item.Artist.ToLower() == artist.ToLower() && item.Title.ToLower() == title.ToLower()));
                         if (gSong != null)
                         {
                             songsToAdd.Add(gSong);
@@ -184,24 +184,9 @@ namespace MusicBeePlugin.Services
             return errors;
         }
 
-        public async Task<List<IPlaylistSyncError>> SyncPlaylistsToMusicBee(MusicBeeSyncHelper mb, List<Playlist> playlists)
+        public async Task<List<IPlaylistSyncError>> SyncToMusicBee(MusicBeeSyncHelper mb, List<Playlist> playlists)
         {
             List<IPlaylistSyncError> errors = new List<IPlaylistSyncError>();
-
-            // Get the absolute path to the root of playlist dir
-            // We do this by creating a blank playlist and seeing where it was created
-            string tempPlaylistName = "mbsynctempplaylist";
-            mb.MbApiInterface.Playlist_CreatePlaylist("", tempPlaylistName, new string[] { });
-
-            // Refresh Mb playlists after making temp playlist
-            mb.RefreshMusicBeePlaylists();
-
-            // Find the root dir from the temp playlist
-            // clean up temp playlist
-            MusicBeePlaylist tempPlaylist = mb.Playlists.FirstOrDefault(x => x.Name == tempPlaylistName);
-            string[] tempPlaylistPathSplit = tempPlaylist.mbName.Split('\\');
-            string musicBeePlaylistRootDir = String.Join("\\", tempPlaylistPathSplit.Take(tempPlaylistPathSplit.Length - 1).ToArray());
-            mb.MbApiInterface.Playlist_DeletePlaylist(tempPlaylist.mbName);
 
             // Go through each playlist we want to sync in turn
             foreach (Playlist playlist in playlists)

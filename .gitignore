@@ -226,3 +226,5 @@ pip-log.txt
 *.ide
 
 .vs/*
+
+SpotifySecrets.cs
