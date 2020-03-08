@@ -26,11 +26,9 @@ namespace MBSyncToServiceUI
     /// </summary>
     public partial class MainWindow : Window
     {
-        public bool? IncludeZ { get { return IncludeZCheckBox.IsChecked; } }
-        public bool? IncludeFolders { get { return IncludeFoldersCheckBox.IsChecked; } }
-        public bool? SyncToService {  get { return SyncToServiceRadioButton.IsChecked; } }
-        public bool? SyncToMusicBee { get { return SyncToMusicBeeRadioButton.IsChecked; } }
-
+        private bool IncludeFolders { get { return IncludeFoldersCheckBox.IsChecked.HasValue && IncludeFoldersCheckBox.IsChecked.Value; } }
+        private bool IncludeZ { get { return IncludeZCheckBox.IsChecked.HasValue && IncludeZCheckBox.IsChecked.Value; } }
+        private bool SyncToService { get { return SyncToServiceRadioButton.IsChecked.HasValue && SyncToServiceRadioButton.IsChecked.Value; } }
         private MusicBeeSyncHelper MusicBee;
         private GoogleSyncHelper Google = new GoogleSyncHelper();
         private SpotifySyncHelper Spotify = new SpotifySyncHelper();
@@ -41,6 +39,7 @@ namespace MBSyncToServiceUI
         public MainWindow(Plugin.MusicBeeApiInterface apiInterface)
         {
             InitializeComponent();
+
             MusicBeePlaylists = new ObservableCollection<CheckedListItem<MusicBeePlaylist>>();
             GooglePlaylists = new ObservableCollection<CheckedListItem<Playlist>>();
 
@@ -48,21 +47,34 @@ namespace MBSyncToServiceUI
             RefreshMusicBeePlaylists();
         }
 
-        public void Log(string line)
+
+        #region MusicBee
+
+        private List<MusicBeePlaylist> GetMusicBeePlaylistsToSync()
         {
-            OutputTextBox.Text += $"{line}\n";
+            List<MusicBeePlaylist> results = new List<MusicBeePlaylist>();
+            foreach (var listItem in MusicBeePlaylists)
+            {
+                if (listItem.IsChecked)
+                {
+                    results.Add(listItem.Item);
+                }
+            }
+
+            return results;
         }
 
-        private void SpotifyLoginButton_Click(object sender, RoutedEventArgs e)
+        private void RefreshMusicBeePlaylists()
         {
-
+            MusicBeePlaylists.Clear();
+            MusicBee.RefreshMusicBeePlaylists();
+            MusicBee.Playlists.ForEach(x => MusicBeePlaylists.Add(new CheckedListItem<MusicBeePlaylist>(x)));
+            MusicBeeListBox.ItemsSource = MusicBeePlaylists;
         }
 
-        private void SpotifySyncButton_Click(object sender, RoutedEventArgs e)
-        {
+        #endregion MusicBee
 
-        }
-
+        #region Google
         private async void GoogleLoginButton_Click(object sender, RoutedEventArgs e)
         {
             GoogleLoginButton.IsEnabled = false;
@@ -75,7 +87,9 @@ namespace MBSyncToServiceUI
             }
             else
             {
-                Log("Logged in successfully.. Fetching Playlists and library");
+                Log("Logged in successfully.");
+                Log("Fetching Playlists and library (this can take some time for large libraries)");
+                await Google.RefreshLibrary();
                 await RefreshGooglePlaylists();
 
                 GoogleSyncButton.IsEnabled = true;
@@ -91,13 +105,14 @@ namespace MBSyncToServiceUI
             List<IPlaylistSyncError> errors = new List<IPlaylistSyncError>();
             GoogleSyncButton.IsEnabled = false;
             GoogleSelectAllButton.IsEnabled = false;
-            Log("Starting sync...");
+            string direction = (SyncToService ? "to" : "from");
+            Log($"Starting sync {direction} Google Play Music...");
             try
             {
-                if (SyncToService.HasValue && SyncToService.Value)
+                if (SyncToService)
                 {
                     List<MusicBeePlaylist> mbPlaylistsToSync = GetMusicBeePlaylistsToSync();
-                    errors = await Google.SyncPlaylistsToGMusic(MusicBee, mbPlaylistsToSync);
+                    errors = await Google.SyncPlaylistsToGMusic(MusicBee, mbPlaylistsToSync, IncludeFolders, IncludeZ);
                 }
                 else
                 {
@@ -115,7 +130,7 @@ namespace MBSyncToServiceUI
                 }
                 else
                 {
-                    Log("Successfully synced playlists to Google");
+                    Log($"Successfully synced playlists {direction} Google Play Music");
                 }
             }
             catch (Exception ex)
@@ -124,20 +139,6 @@ namespace MBSyncToServiceUI
             }
             GoogleSyncButton.IsEnabled = true;
             GoogleSelectAllButton.IsEnabled = true;
-        }
-
-        private List<MusicBeePlaylist> GetMusicBeePlaylistsToSync()
-        {
-            List<MusicBeePlaylist> results = new List<MusicBeePlaylist>();
-            foreach (var listItem in MusicBeePlaylists)
-            {
-                if (listItem.IsChecked)
-                {
-                    results.Add(listItem.Item);
-                }
-            }
-
-            return results;
         }
 
         private List<Playlist> GetGooglePlaylistsToSync()
@@ -153,28 +154,12 @@ namespace MBSyncToServiceUI
             return results;
         }
 
-        private void RefreshMusicBeePlaylists()
-        {
-            MusicBeePlaylists.Clear();
-            MusicBee.RefreshMusicBeePlaylists();
-            MusicBee.Playlists.ForEach(x => MusicBeePlaylists.Add(new CheckedListItem<MusicBeePlaylist>(x)));
-            MusicBeeListBox.ItemsSource = MusicBeePlaylists;
-        }
-
-        private async Task RefreshGooglePlaylists(bool fetchSongs=false)
+        private async Task RefreshGooglePlaylists(bool fetchSongs = false)
         {
             List<Playlist> googlePlaylists = await Google.FetchPlaylists(fetchSongs);
             GooglePlaylists.Clear();
             googlePlaylists.ForEach(x => GooglePlaylists.Add(new CheckedListItem<Playlist>(x)));
             GooglePlaylistListBox.ItemsSource = GooglePlaylists;
-        }
-
-        private void ChangeStateOfAllCheckBoxes<T>(ObservableCollection<CheckedListItem<T>> list, bool isChecked)
-        {
-            foreach (var item in list)
-            {
-                item.IsChecked = isChecked;
-            }
         }
 
         private void GoogleSelectAllButton_Checked(object sender, RoutedEventArgs e)
@@ -187,6 +172,19 @@ namespace MBSyncToServiceUI
             ChangeStateOfAllCheckBoxes(GooglePlaylists, false);
         }
 
+        #endregion Google
+
+        #region Spotify
+
+        private void SpotifyLoginButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void SpotifySyncButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
         private void SpotifySelectAllButton_Checked(object sender, RoutedEventArgs e)
         {
 
@@ -196,5 +194,22 @@ namespace MBSyncToServiceUI
         {
 
         }
+
+        #endregion Spotify
+
+        #region Helpers
+
+        public void Log(string line)
+        {
+            OutputTextBox.Text += $"{line}\n";
+        }
+        private void ChangeStateOfAllCheckBoxes<T>(ObservableCollection<CheckedListItem<T>> list, bool isChecked)
+        {
+            foreach (var item in list)
+            {
+                item.IsChecked = isChecked;
+            }
+        }
+        #endregion
     }
 }

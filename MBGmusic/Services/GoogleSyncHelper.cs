@@ -216,12 +216,11 @@ namespace MusicBeePlugin.Services
                 {
                     Track thisSong = GoogleSongsFetched.FirstOrDefault(s => s.Id == entry.TrackID || s.NID == entry.TrackID);
 
-                    // if we couldn't find it, attempt to fetch it by trackID
-                    if (thisSong == null)
+                    // if we couldn't find it, attempt to fetch it by trackID and cache it
+                    if (IsTrackInvalid(thisSong))
                     {
-                        // Didn't find it in cached library, so query for it
                         thisSong = await api.GetTrackAsync(entry.TrackID);
-                        if (thisSong == null)
+                        if (IsTrackInvalid(thisSong))
                         {
                             errors.Add(new UnableToFindGooglePlaylistEntryError()
                             {
@@ -236,7 +235,7 @@ namespace MusicBeePlugin.Services
                         }
                     }
 
-                    if (thisSong != null)
+                    if (!IsTrackInvalid(thisSong))
                     {
                         MusicBeeSong thisMbSong = mb.Songs.FirstOrDefault(s => s.Artist == thisSong.Artist && s.Title == thisSong.Title);
                         if (thisMbSong != null)
@@ -297,6 +296,11 @@ namespace MusicBeePlugin.Services
             mb.RefreshMusicBeePlaylists();
 
             return errors;
+        }
+
+        private static bool IsTrackInvalid(Track track)
+        {
+            return track == null || track.Artist == null || track.Artist == "" || track.Title == null || track.Title == "";
         }
 
         public class UnableToFindGooglePlaylistEntryError : IPlaylistSyncError

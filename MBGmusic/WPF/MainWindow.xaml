@@ -7,8 +7,8 @@
         Title="MainWindow" Height="700" Width="680" Background="Gray">
     <Grid>
         <TextBox x:Name="OutputTextBox" HorizontalAlignment="Left" Height="160" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="655" IsReadOnly="True"/>
-        <CheckBox x:Name="IncludeFoldersCheckBox" Content="Include Folders in Playlist Name" HorizontalAlignment="Left" Margin="10,648,0,0" VerticalAlignment="Top"/>
-        <CheckBox x:Name="IncludeZCheckBox" Content="Include Z at Start of Date Playlists" HorizontalAlignment="Left" Margin="203,648,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="IncludeFoldersCheckBox" Content="Include Folders in Playlist Name" IsChecked="{Binding Path=Settings.IncludeFoldersInPlaylistName}" HorizontalAlignment="Left" Margin="10,648,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="IncludeZCheckBox" Content="Include Z at Start of Date Playlists" IsChecked="{Binding Path=Settings.IncludeZAtStartOfDatePlaylistName}"  HorizontalAlignment="Left" Margin="203,648,0,0" VerticalAlignment="Top"/>
         <ListBox x:Name="MusicBeeListBox" HorizontalAlignment="Left" Height="468" Margin="10,175,0,0" VerticalAlignment="Top" Width="300">
             <ListBox.ItemTemplate>
                 <DataTemplate>

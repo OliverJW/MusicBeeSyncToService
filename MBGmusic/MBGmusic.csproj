@@ -95,20 +95,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\PlaylistSyncError.cs" />
-    <Compile Include="MusicBeePlugin\Logger.cs" />
     <Compile Include="Models\MusicBeePlaylist.cs" />
     <Compile Include="Models\MusicBeeSong.cs" />
-    <Compile Include="MusicBeePlugin\PlaylistSync.cs" />
-    <Compile Include="MusicBeePlugin\Settings.cs" />
     <Compile Include="Services\GoogleSyncHelper.cs" />
     <Compile Include="Services\MusicBeeSyncHelper.cs" />
     <Compile Include="Services\SpotifySyncHelper.cs" />
-    <Compile Include="Views\Configure.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Views\Configure.Designer.cs">
-      <DependentUpon>Configure.cs</DependentUpon>
-    </Compile>
     <Compile Include="MusicBeePlugin\MusicBeeInterface.cs" />
     <Compile Include="MusicBeePlugin\MBGmusicPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -148,11 +139,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Views\Configure.resx">
-      <DependentUpon>Configure.cs</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\GooglePlayMusicClient\GooglePlayMusicClient\GooglePlayMusicClient.csproj">
       <Project>{7d0a5653-e2c3-4cef-aae1-cf19d4ec3516}</Project>
       <Name>GooglePlayMusicClient</Name>
@@ -164,9 +150,7 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="WPF\ListBoxItems\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /Y "$(TargetDir)\*.*" "C:\Program Files (x86)\MusicBee\Plugins\"</PostBuildEvent>
