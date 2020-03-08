@@ -3,6 +3,8 @@ MusicBee to Google Music Playlist Sync
 
 This is a [MusicBee](http://getmusicbee.com) plugin  designed to allow users to synchronise their local playlists to Google Play.
 
+<img src="https://github.com/mitchhymel/MBGmusicSync/blob/master/Screenshot.png" height="500" width="400">
+
 Warning
 -------
 
