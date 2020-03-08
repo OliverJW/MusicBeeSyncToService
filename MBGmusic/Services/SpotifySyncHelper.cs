@@ -157,26 +157,26 @@ namespace MusicBeePlugin.Services
                     string artist = mb.MbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.Artist);
                     string album = mb.MbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.Album);
 
-                    string artistEsc = artist.Replace(" ", "%20");
-                    string titleEsc = title.Replace(" ", "%20");
+                    string artistEsc = EscapeChar(artist.ToLower());
+                    string titleEsc = EscapeChar(title.ToLower());
                     string searchStr = $"artist:{artistEsc}%20track:{titleEsc}";
                     SearchItem search = await Spotify.SearchItemsAsync(searchStr, SpotifyAPI.Web.Enums.SearchType.Track);
 
                     if (search.HasError())
                     {
-                        Log($"Could not find track on Spotify '{searchStr}': {search.Error}");
+                        Log($"Could not find track on Spotify '{searchStr}' for '{title}' by '{artist}': {search.Error.Message}");
                         continue;
                     }
 
                     if (search.Tracks.HasError())
                     {
-                        Log($"Could not find track on Spotify '{searchStr}': {search.Tracks.Error}");
+                        Log($"Could not find track on Spotify '{searchStr}' for '{title}' by '{artist}': {search.Tracks.Error.Message}");
                         continue;
                     }
 
                     if (search.Tracks.Total == 0)
                     {
-                        Log($"Found 0 results on Spotify for: {searchStr}");
+                        Log($"Found 0 results on Spotify for: {searchStr} for '{title}' by '{artist}'");
                         continue;
                     }
 
@@ -186,7 +186,22 @@ namespace MusicBeePlugin.Services
                 }
 
                 List<string> uris = songsToAdd.ConvertAll(x => x.Uri);
-                ErrorResponse response = await Spotify.AddPlaylistTracksAsync(Profile.Id, thisPlaylistId, uris);
+                while (uris.Count > 0)
+                {
+                    List<string> currUris = uris.Take(75).ToList();
+                    if (currUris.Count == 0)
+                    {
+                        break;
+                    }
+
+                    uris.RemoveRange(0, currUris.Count);
+                    ErrorResponse response = await Spotify.AddPlaylistTracksAsync(Profile.Id, thisPlaylistId, currUris);
+                    if (response.HasError())
+                    {
+                        Log(response.Error.Message);
+                        return errors;
+                    }
+                }
             }
 
             return errors;
@@ -274,6 +289,26 @@ namespace MusicBeePlugin.Services
             mb.RefreshMusicBeePlaylists();
 
             return errors;
+        }
+
+        private string EscapeChar(string input)
+        {
+            //if (input.Contains("(feat"))
+            //{
+            //    input = input.Remove(input.IndexOf("(feat"), input.IndexOf(")"));
+            //}
+
+            return input.Replace(" ", "%20")
+                .Replace(",", "")
+                .Replace(".", "")
+                .Replace("!", "")
+                .Replace("?", "")
+                .Replace("'", "")
+                .Replace(")", "")
+                .Replace("(", "")
+                .Replace("#", "")
+                .Replace("\\","")
+                .Replace("/","");
         }
 
 

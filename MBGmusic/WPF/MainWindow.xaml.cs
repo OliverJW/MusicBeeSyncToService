@@ -101,7 +101,17 @@ namespace MBSyncToServiceUI
         {
             GoogleLoginButton.IsEnabled = false;
             Log("Logging into Google...");
-            await Google.Login();
+            
+            try
+            {
+                await Google.Login();
+            }
+            catch (Exception ex)
+            {
+                Log($"Exception while trying to log in: ${ex.Message}");
+                return;
+            }
+
             if (!Google.IsLoggedIn())
             {
                 Log("Error while trying to log in to Google Play Music.");
@@ -290,6 +300,7 @@ namespace MBSyncToServiceUI
         public void Log(string line)
         {
             OutputTextBox.Text += $"{line}\n";
+            OutputTextBox.ScrollToEnd();
         }
 
         private void ChangeStateOfAllCheckBoxes<T>(ObservableCollection<CheckedListItem<T>> list, bool isChecked)
