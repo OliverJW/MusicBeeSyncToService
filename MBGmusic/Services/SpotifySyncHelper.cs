@@ -186,15 +186,21 @@ namespace MusicBeePlugin.Services
                     {
                         bool titleMatches = (track.Name.ToLower() != title.ToLower());
                         bool artistMatches = (track.Artists.Exists(a => a.Name.ToLower() == artist.ToLower()));
-                        if (titleMatches && artistMatches)
+                        bool albumMatches = (track.Album.Name.ToLower() == album.ToLower());
+                        if (titleMatches && artistMatches && albumMatches)
                         {
                             trackToAdd = track;
                             break;
                         }
-                        else if (artistMatches)
+                        else if ((titleMatches && artistMatches) || (titleMatches && albumMatches) || (artistMatches && albumMatches))
                         {
-                            // if just the artist matches but not the title, guessing this track is correct is 
+                            // if two of them match, guessing this track is correct is 
                             // probably better than just using the firstordefault, but keep looping hoping for a better track
+                            trackToAdd = track;
+                        }
+                        else if (artistMatches && trackToAdd == null)
+                        {
+                            // if just the artist matches and we haven't found anything yet... this might be our best guess
                             trackToAdd = track;
                         }
                     }
