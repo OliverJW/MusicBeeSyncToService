@@ -180,9 +180,32 @@ namespace MusicBeePlugin.Services
                         continue;
                     }
 
-                    // Take the first one?
-                    FullTrack track = search.Tracks.Items.FirstOrDefault();
-                    songsToAdd.Add(track);
+                    // try to find track matching artist and title
+                    FullTrack trackToAdd = null;
+                    foreach (FullTrack track in search.Tracks.Items)
+                    {
+                        bool titleMatches = (track.Name.ToLower() != title.ToLower());
+                        bool artistMatches = (track.Artists.Exists(a => a.Name.ToLower() == artist.ToLower()));
+                        if (titleMatches && artistMatches)
+                        {
+                            trackToAdd = track;
+                            break;
+                        }
+                        else if (artistMatches)
+                        {
+                            // if just the artist matches but not the title, guessing this track is correct is 
+                            // probably better than just using the firstordefault, but keep looping hoping for a better track
+                            trackToAdd = track;
+                        }
+                    }
+
+                    if (trackToAdd == null)
+                    {
+                        trackToAdd = search.Tracks.Items.FirstOrDefault();
+                        Log($"Didn't find a perfect match for {searchStr} for '{title}' by '{artist}', so using '{trackToAdd.Name}' by '{trackToAdd.Artists.FirstOrDefault().Name}' instead");
+                    }
+
+                    songsToAdd.Add(trackToAdd);
                 }
 
                 List<string> uris = songsToAdd.ConvertAll(x => x.Uri);
@@ -293,22 +316,27 @@ namespace MusicBeePlugin.Services
 
         private string EscapeChar(string input)
         {
-            //if (input.Contains("(feat"))
-            //{
-            //    input = input.Remove(input.IndexOf("(feat"), input.IndexOf(")"));
-            //}
+            int openIndex = input.IndexOf("(f");
+            int closeIndex = input.IndexOf(")");
+            if (openIndex >= 0 && closeIndex > 0 && openIndex < closeIndex)
+            {
+                input = input.Remove(openIndex, closeIndex-openIndex);
+            }
 
-            return input.Replace(" ", "%20")
-                .Replace(",", "")
-                .Replace(".", "")
-                .Replace("!", "")
-                .Replace("?", "")
-                .Replace("'", "")
-                .Replace(")", "")
-                .Replace("(", "")
-                .Replace("#", "")
-                .Replace("\\","")
-                .Replace("/","");
+            return input.Replace(",", " ")
+                .Replace(".", " ")
+                .Replace("!", " ")
+                .Replace("?", " ")
+                .Replace("'",  "")
+                .Replace(")", " ")
+                .Replace("(", " ")
+                .Replace("#", " ")
+                .Replace("\\"," ")
+                .Replace("/", " ")
+                .Replace("&", " ")
+                .Replace(":", " ")
+                .Replace(";", " ")
+                .Replace(" ", "%20");
         }
 
 
