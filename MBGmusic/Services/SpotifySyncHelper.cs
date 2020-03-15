@@ -184,7 +184,7 @@ namespace MusicBeePlugin.Services
                     FullTrack trackToAdd = null;
                     foreach (FullTrack track in search.Tracks.Items)
                     {
-                        bool titleMatches = (track.Name.ToLower() != title.ToLower());
+                        bool titleMatches = (track.Name.ToLower() == title.ToLower());
                         bool artistMatches = (track.Artists.Exists(a => a.Name.ToLower() == artist.ToLower()));
                         bool albumMatches = (track.Album.Name.ToLower() == album.ToLower());
                         if (titleMatches && artistMatches && albumMatches)
