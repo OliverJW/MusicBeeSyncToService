@@ -3,7 +3,7 @@ MusicBee Sync To Service
 
 This is a [MusicBee](http://getmusicbee.com) plugin to synchronise local MusicBee playlists to Spotify and Google Play Music.
 
-<img src="https://github.com/mitchhymel/MusicBeeSyncToService/blob/master/Screenshot.png" >
+<img src="https://github.com/mitchhymel/MusicBeeSyncToService/blob/master/Screenshot.png" height=450 >
 
 
 C#/.NET API For Google Play Music
