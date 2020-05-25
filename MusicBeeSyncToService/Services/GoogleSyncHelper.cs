@@ -261,12 +261,6 @@ namespace MusicBeePlugin.Services
                 string playlistRelativeDir = "";
                 string playlistName = playlist.Name;
 
-                // if it's a date playlist, remove first Z
-                if (playlistName.StartsWith("Z "))
-                {
-                    playlistName = playlistName.Skip(2).ToString();
-                }
-
                 string[] itemsInPath = playlist.Name.Split('\\');
                 if (itemsInPath.Length > 1)
                 {
