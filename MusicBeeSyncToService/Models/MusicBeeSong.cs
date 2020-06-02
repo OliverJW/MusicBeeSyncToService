@@ -10,6 +10,7 @@ namespace MusicBeePlugin.Models
         public String Filename;
         public String Artist;
         public String Title;
+        public String Album;
 
         public override string ToString()
         {

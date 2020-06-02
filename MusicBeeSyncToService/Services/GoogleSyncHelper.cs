@@ -222,7 +222,7 @@ namespace MusicBeePlugin.Services
 
                     if (!IsTrackInvalid(thisSong))
                     {
-                        MusicBeeSong thisMbSong = mb.Songs.FirstOrDefault(s => s.Artist == thisSong.Artist && s.Title == thisSong.Title);
+                        MusicBeeSong thisMbSong = mb.Songs.FirstOrDefault(s => s.Artist == thisSong.Artist && s.Title == thisSong.Title && s.Album == thisSong.Album);
                         if (thisMbSong != null)
                         {
                             mbPlaylistSongs.Add(thisMbSong);

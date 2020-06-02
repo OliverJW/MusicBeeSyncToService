@@ -76,6 +76,7 @@ namespace MusicBeePlugin.Services
                 thisSong.Filename = path;
                 thisSong.Artist = MbApiInterface.Library_GetFileTag(path, Plugin.MetaDataType.Artist);
                 thisSong.Title = MbApiInterface.Library_GetFileTag(path, Plugin.MetaDataType.TrackTitle);
+                thisSong.Album = MbApiInterface.Library_GetFileTag(path, Plugin.MetaDataType.Album);
                 allMbSongs.Add(thisSong);
             }
             return allMbSongs;
