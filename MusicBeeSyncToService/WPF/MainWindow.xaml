@@ -19,7 +19,7 @@
         <TabControl HorizontalAlignment="Left" Height="468" Margin="355,175,10,0" VerticalAlignment="Top" Width="320">
             <TabItem Header="Spotify">
                 <Grid>
-                    <Button x:Name="SpotifyLoginButton" Click="SpotifyLoginButton_Click" Content="Login" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="10,9,0,0"/>
+                    <Button x:Name="SpotifyLoginButton" Click="SpotifyLoginButton_ClickAsync" Content="Login" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="10,9,0,0"/>
                     <Button x:Name="SpotifySyncButton" Click="SpotifySyncButton_Click" Content="Synchronize Selected" IsEnabled="False" HorizontalAlignment="Left" Margin="172,10,0,0" VerticalAlignment="Top" Width="118" Height="20"/>
                     <CheckBox x:Name="SpotifySelectAllButton" Content="Select All" Checked="SpotifySelectAllButton_Checked" Unchecked="SpotifySelectAllButton_Unchecked" HorizontalAlignment="Left" Margin="98,12,0,0" VerticalAlignment="Top" IsEnabled="False"/>
                     <ListBox x:Name="SpotifyPlaylistListBox"  HorizontalAlignment="Left" Height="405" Margin="10,35,0,0" VerticalAlignment="Top" Width="280">

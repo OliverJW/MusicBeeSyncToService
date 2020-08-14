@@ -3,7 +3,7 @@ using MusicBeePlugin;
 using MusicBeePlugin.Models;
 using MusicBeePlugin.Services;
 using MusicBeePlugin.WPF;
-using SpotifyAPI.Web.Models;
+using SpotifyAPI.Web;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -50,23 +50,7 @@ namespace MBSyncToServiceUI
             RefreshMusicBeePlaylists();
 
             Action<string> log = (s) => Dispatcher.Invoke(() => { Log(s); });
-            Action<bool> onSpotifyLogin = (f) => Dispatcher.Invoke(async () =>
-            {
-                if (f)
-                {
-                    Log("Logged into Spotify successfully.");
-                    Log("Fetching Spotify Playlists...");
-                    SpotifySelectAllButton.IsEnabled = true;
-                    SpotifySyncButton.IsEnabled = true;
-                    await RefreshSpotifyPlaylists();
-                }
-                else
-                {
-                    Log("Error when trying to login to Spotify.");
-                    SpotifyLoginButton.IsEnabled = true;
-                }
-            });
-            Spotify = new SpotifySyncHelper(log, onSpotifyLogin);
+            Spotify = new SpotifySyncHelper(log);
         }
 
 
@@ -209,11 +193,34 @@ namespace MBSyncToServiceUI
 
         #region Spotify
 
-        private void SpotifyLoginButton_Click(object sender, RoutedEventArgs e)
+        private async void SpotifyLoginButton_ClickAsync(object sender, RoutedEventArgs e)
         {
             Log("Opening browser to log in to Spotify...");
             SpotifyLoginButton.IsEnabled = false;
-            Spotify.Login();
+
+            bool success = false;
+            try
+            {
+                success = await Spotify.LoginAsync();
+            }
+            catch (Exception ex)
+            {
+                Log($"Error when trying to login to Spotify: {ex.Message}");
+            }
+
+            if (success)
+            {
+                Log("Logged into Spotify successfully.");
+                Log("Fetching Spotify Playlists...");
+                SpotifySelectAllButton.IsEnabled = true;
+                SpotifySyncButton.IsEnabled = true;
+                await RefreshSpotifyPlaylists();
+            }
+            else
+            {
+                Log("Error when trying to login to Spotify.");
+                SpotifyLoginButton.IsEnabled = true;
+            }
         }
 
         private async void SpotifySyncButton_Click(object sender, RoutedEventArgs e)

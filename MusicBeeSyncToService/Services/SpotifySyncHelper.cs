@@ -1,7 +1,7 @@
 ﻿using MusicBeePlugin.Models;
 using SpotifyAPI.Web;
 using SpotifyAPI.Web.Auth;
-using SpotifyAPI.Web.Models;
+using SpotifyAPI.Web.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,75 +12,71 @@ namespace MusicBeePlugin.Services
 {
     public class SpotifySyncHelper
     {
-        private PrivateProfile Profile;
-        private SpotifyWebAPI Spotify;
+        private PrivateUser Profile;
+        private SpotifyClient Spotify;
         private Action<string> Log;
-        private Action<bool> OnLoginDone;
+        private EmbedIOAuthServer Server;
 
         public List<SimplePlaylist> Playlists { get; set; } = new List<SimplePlaylist>();
 
-        public SpotifySyncHelper(Action<string> log, Action<bool> onLoginDone)
+        public SpotifySyncHelper(Action<string> log)
         {
             Log = log;
-            OnLoginDone = onLoginDone;
         }
+
+        public async Task<bool> LoginAsync()
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            await LoginToSpotify(tcs);
+            return await tcs.Task;
+        }
+
+        private async Task LoginToSpotify(TaskCompletionSource<bool> tcs)
+        {
+            Server = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000);
+            await Server.Start();
+
+            Server.ImplictGrantReceived += async (object sender, ImplictGrantResponse response) =>
+            {
+                await Server.Stop();
+                if (response.AccessToken != null)
+                {
+                    Spotify = new SpotifyClient(response.AccessToken);
+                    Profile = await Spotify.UserProfile.Current();
+                    tcs.SetResult(Spotify != null);
+                }
+                else
+                {
+                    Log("Error when attempting to log in");
+                    tcs.SetResult(false);
+                }
+            };
+
+            var request = new LoginRequest(Server.BaseUri, SpotifySecrets.CLIENT_ID, LoginRequest.ResponseType.Token)
+            {
+                Scope = new List<string> 
+                {
+                    Scopes.UserLibraryRead,
+                    Scopes.PlaylistModifyPublic
+                }
+            };
+            BrowserUtil.Open(request.ToUri());
+        }
+
 
         public bool IsLoggedIn()
         {
-            return Spotify != null && Spotify.AccessToken != null && Spotify.AccessToken != "";
-        }
-
-        public void Login()
-        {
-            AuthorizationCodeAuth auth = new AuthorizationCodeAuth(SpotifySecrets.CLIENT_ID, SpotifySecrets.CLIENT_SECRET, "http://localhost:8000", "http://localhost:8000",
-                SpotifyAPI.Web.Enums.Scope.UserLibraryRead | SpotifyAPI.Web.Enums.Scope.PlaylistModifyPublic);
-
-            auth.AuthReceived += AuthOnAuthReceived;
-
-            try
-            {
-                auth.Start();
-                auth.OpenBrowser();
-            }
-            catch (Exception ex)
-            {
-                Log(ex.Message);
-            }
-        }
-
-        private async void AuthOnAuthReceived(object sender, AuthorizationCode payload)
-        {
-            AuthorizationCodeAuth auth = (AuthorizationCodeAuth)sender;
-            auth.Stop();
-
-            Token token = await auth.ExchangeCode(payload.Code);
-            Spotify = new SpotifyWebAPI
-            {
-                AccessToken = token.AccessToken,
-                TokenType = token.TokenType
-            };
-
-            if (Spotify == null)
-            {
-                OnLoginDone(false);
-            }
-            else
-            {
-                Profile = await Spotify.GetPrivateProfileAsync();
-                OnLoginDone(true);
-            }
-
+            return Spotify != null;
         }
 
         public async Task<List<SimplePlaylist>> RefreshPlaylists()
         {
             Playlists.Clear();
-            Paging<SimplePlaylist> response = await Spotify.GetUserPlaylistsAsync(Profile.Id, limit:100);
-            response.Items.ForEach(i => Playlists.Add(i));
-            while (response.HasNextPage())
+            Paging<SimplePlaylist> response = await Spotify.Playlists.GetUsers(Profile.Id);
+            var all = await Spotify.PaginateAll(response);
+            foreach (var item in all)
             {
-                response = await Spotify.GetUserPlaylistsAsync(Profile.Id, limit: 100, offset:response.Offset+1);
-                response.Items.ForEach(i => Playlists.Add(i));
+                Playlists.Add(item);
             }
 
             return Playlists;
@@ -122,17 +118,19 @@ namespace MusicBeePlugin.Services
                 string thisPlaylistId;
                 if (thisPlaylist != null)
                 {
-                    ErrorResponse res = await Spotify.ReplacePlaylistTracksAsync(thisPlaylist.Id, new List<string>(){ });
-                    if (res.HasError())
+                    var request = new PlaylistReplaceItemsRequest(new List<string>() { });
+                    var success = await Spotify.Playlists.ReplaceItems(thisPlaylist.Id, request);
+                    if (!success)
                     {
-                        Log(res.Error.Message);
+                        Log("Error while trying to clear playlist before syncing new tracks");
                         return errors;
                     }
                     thisPlaylistId = thisPlaylist.Id;
                 }
                 else
                 {
-                    FullPlaylist newPlaylist = await Spotify.CreatePlaylistAsync(Profile.Id, spotifyPlaylistName);
+                    var request = new PlaylistCreateRequest(spotifyPlaylistName);
+                    FullPlaylist newPlaylist = await Spotify.Playlists.Create(Profile.Id, request);
                     thisPlaylistId = newPlaylist.Id;
                 }
 
@@ -159,22 +157,17 @@ namespace MusicBeePlugin.Services
 
                     string artistEsc = EscapeChar(artist.ToLower());
                     string titleEsc = EscapeChar(title.ToLower());
-                    string searchStr = $"artist:{artistEsc}%20track:{titleEsc}";
-                    SearchItem search = await Spotify.SearchItemsAsync(searchStr, SpotifyAPI.Web.Enums.SearchType.Track);
+                    string searchStr = $"artist:{artistEsc} track:{titleEsc}";
+                    var request = new SearchRequest(SearchRequest.Types.Track, searchStr);
+                    SearchResponse search = await Spotify.Search.Item(request);
 
-                    if (search.HasError())
+                    if (search.Tracks == null || search.Tracks.Items == null)
                     {
-                        Log($"Could not find track on Spotify '{searchStr}' for '{title}' by '{artist}': {search.Error.Message}");
+                        Log($"Could not find track on Spotify '{searchStr}' for '{title}' by '{artist}'");
                         continue;
                     }
 
-                    if (search.Tracks.HasError())
-                    {
-                        Log($"Could not find track on Spotify '{searchStr}' for '{title}' by '{artist}': {search.Tracks.Error.Message}");
-                        continue;
-                    }
-
-                    if (search.Tracks.Total == 0)
+                    if (search.Tracks.Items.Count == 0)
                     {
                         Log($"Found 0 results on Spotify for: {searchStr} for '{title}' by '{artist}'");
                         continue;
@@ -224,10 +217,11 @@ namespace MusicBeePlugin.Services
                     }
 
                     uris.RemoveRange(0, currUris.Count);
-                    ErrorResponse response = await Spotify.AddPlaylistTracksAsync(Profile.Id, thisPlaylistId, currUris);
-                    if (response.HasError())
+                    var request = new PlaylistAddItemsRequest(currUris);
+                    var resp = await Spotify.Playlists.AddItems(thisPlaylistId, request);
+                    if (resp == null)
                     {
-                        Log(response.Error.Message);
+                        Log("Error while trying to update playlist with track uris");
                         return errors;
                     }
                 }
@@ -247,19 +241,21 @@ namespace MusicBeePlugin.Services
                 List<MusicBeeSong> mbPlaylistSongs = new List<MusicBeeSong>();
 
                 // Get all tracks for playlist
-                List<PlaylistTrack> tracks = new List<PlaylistTrack>();
-                Paging<PlaylistTrack> resp = await Spotify.GetPlaylistTracksAsync(playlist.Id);
-                resp.Items.ForEach(t => tracks.Add(t));
-                while (resp.HasNextPage())
+                var fp = await Spotify.Playlists.Get(playlist.Id);
+                var allTracks = await Spotify.PaginateAll(fp.Tracks);
+                var tracks = new List<FullTrack>();
+                foreach (var t in allTracks)
                 {
-                    resp = await Spotify.GetPlaylistTracksAsync(playlist.Id, offset: resp.Offset + 1);
-                    resp.Items.ForEach(t => tracks.Add(t));
+                    if (t.Track is FullTrack track)
+                    {
+                        tracks.Add(track);
+                    }
                 }
 
-                foreach (PlaylistTrack track in tracks)
+                foreach (FullTrack track in tracks)
                 {
-                    string artistStr = track.Track.Artists.FirstOrDefault().Name.ToLower();
-                    string titleStr = track.Track.Name.ToLower();
+                    string artistStr = track.Artists.FirstOrDefault().Name.ToLower();
+                    string titleStr = track.Name.ToLower();
                     MusicBeeSong thisMbSong = mb.Songs.FirstOrDefault(s => s.Artist.ToLower() == artistStr && s.Title.ToLower() == titleStr);
                     if (thisMbSong != null)
                     {
@@ -269,10 +265,10 @@ namespace MusicBeePlugin.Services
                     {
                         errors.Add(new UnableToFindSpotifyTrackError()
                         {
-                            AlbumName = track.Track.Album.Name,
-                            ArtistName = track.Track.Artists.FirstOrDefault().Name,
+                            AlbumName = track.Album.Name,
+                            ArtistName = track.Artists.FirstOrDefault().Name,
                             PlaylistName = playlist.Name,
-                            TrackName = track.Track.Name,
+                            TrackName = track.Name,
                             SearchedSpotify = false
                         });
                     }
@@ -342,7 +338,7 @@ namespace MusicBeePlugin.Services
                 .Replace("&", " ")
                 .Replace(":", " ")
                 .Replace(";", " ")
-                .Replace(" ", "%20");
+                .Replace(" ", " ");
         }
 
 
