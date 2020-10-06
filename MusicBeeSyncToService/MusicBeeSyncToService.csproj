@@ -93,6 +93,7 @@
     <Compile Include="Models\MusicBeePlaylist.cs" />
     <Compile Include="Models\MusicBeeSong.cs" />
     <Compile Include="Models\SpotifyPlaylist.cs" />
+    <Compile Include="Models\YoutubeMusicPlaylist.cs" />
     <Compile Include="Services\GoogleSyncHelper.cs" />
     <Compile Include="Services\MusicBeeSyncHelper.cs" />
     <Compile Include="Services\SpotifySecrets.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="MusicBeePlugin\MusicBeeInterface.cs" />
     <Compile Include="MusicBeePlugin\MBGmusicPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\YoutubeMusicSyncHelper.cs" />
     <Compile Include="WPF\CheckedListItem.cs" />
     <Compile Include="WPF\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -109,6 +111,9 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Example\headers_auth.json" />
+    <None Include="Example\headers_auth_example.json" />
+    <None Include="Example\HowToAuthToYoutubeMusic.md" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
@@ -136,6 +141,10 @@
     <ProjectReference Include="..\..\GooglePlayMusicClient\GooglePlayMusicClient\GooglePlayMusicClient.csproj">
       <Project>{7d0a5653-e2c3-4cef-aae1-cf19d4ec3516}</Project>
       <Name>GooglePlayMusicClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\YoutubeMusicApi\YoutubeMusicApi\YoutubeMusicApi.csproj">
+      <Project>{582dbbf0-f133-4154-b3a4-5ce4d3d719eb}</Project>
+      <Name>YoutubeMusicApi</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

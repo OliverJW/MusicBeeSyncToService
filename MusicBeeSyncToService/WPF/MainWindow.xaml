@@ -31,7 +31,23 @@
                     </ListBox>
                 </Grid>
             </TabItem>
-            <TabItem Header="Google">
+            
+            <TabItem Header="YoutubeMusic">
+                <Grid>
+                    <Button x:Name="YoutubeLoginButton" Click="YoutubeLoginButton_Click" Content="Login" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="10,9,0,0"/>
+                    <Button x:Name="YoutubeSyncButton" Click="YoutubeSyncButton_Click" Content="Synchronize Selected" IsEnabled="False" HorizontalAlignment="Left" Margin="172,10,0,0" VerticalAlignment="Top" Width="118" Height="20"/>
+                    <CheckBox x:Name="YoutubeSelectAllButton" Checked="YoutubeSelectAllButton_Checked" Unchecked="YoutubeSelectAllButton_Unchecked" Content="Select All" HorizontalAlignment="Left" Margin="98,12,0,0" VerticalAlignment="Top" IsEnabled="False"/>
+                    <ListBox x:Name="YoutubePlaylistListBox"  HorizontalAlignment="Left" Height="405" Margin="10,35,0,0" VerticalAlignment="Top" Width="280">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding IsChecked}" Content="{Binding Path=Name}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </TabItem>
+            
+            <TabItem Header="Google (Deprecated)">
                 <Grid>
                     <Button x:Name="GoogleLoginButton" Click="GoogleLoginButton_Click" Content="Login" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="10,9,0,0"/>
                     <Button x:Name="GoogleSyncButton" Click="GoogleSyncButton_Click" Content="Synchronize Selected" IsEnabled="False" HorizontalAlignment="Left" Margin="172,10,0,0" VerticalAlignment="Top" Width="118" Height="20"/>

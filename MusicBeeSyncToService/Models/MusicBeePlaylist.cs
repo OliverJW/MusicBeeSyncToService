@@ -7,8 +7,10 @@ namespace MusicBeePlugin.Models
 {
     public class MusicBeePlaylist
     {
-        public String mbName;
-        public String Name;
+        public List<MusicBeeSong> Songs = new List<MusicBeeSong>();
+
+        public string mbName;
+        public string Name;
         public override string ToString()
         {
             return Name;

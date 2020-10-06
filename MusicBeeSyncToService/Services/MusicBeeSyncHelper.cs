@@ -43,6 +43,36 @@ namespace MusicBeePlugin.Services
                 MbPlaylist.mbName = playlist;
                 MbPlaylist.Name = playlistName;
 
+                // get playlist tracks
+                string[] playlistFiles = null;
+                if (MbApiInterface.Playlist_QueryFiles(playlist))
+                {
+                    bool success = MbApiInterface.Playlist_QueryFilesEx(playlist, ref playlistFiles);
+                    if (!success)
+                        throw new Exception("Couldn't get playlist files");
+                }
+                else
+                {
+                    playlistFiles = new string[0];
+                }
+
+                foreach (string file in playlistFiles)
+                {
+                    string title = MbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.TrackTitle);
+                    string artist = MbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.Artist);
+                    string album = MbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.Album);
+
+                    var song = new MusicBeeSong()
+                    {
+                        Album = album,
+                        Artist = artist,
+                        Title = title,
+                        Filename = file,
+                    };
+
+                    MbPlaylist.Songs.Add(song);
+                }
+
                 MbPlaylists.Add(MbPlaylist);
 
                 // Query the next mbPlaylist to start again

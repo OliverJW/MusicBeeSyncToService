@@ -134,26 +134,14 @@ namespace MusicBeePlugin.Services
                     thisPlaylistId = newPlaylist.Id;
                 }
 
-                // Create a list of files based on the MB Playlist
-                string[] playlistFiles = null;
-                if (mb.MbApiInterface.Playlist_QueryFiles(playlist.mbName))
-                {
-                    bool success = mb.MbApiInterface.Playlist_QueryFilesEx(playlist.mbName, ref playlistFiles);
-                    if (!success)
-                        throw new Exception("Couldn't get playlist files");
-                }
-                else
-                {
-                    playlistFiles = new string[0];
-                }
 
                 List<FullTrack> songsToAdd = new List<FullTrack>();
                 // And get the title and artist of each file, and add it to the GMusic playlist
-                foreach (string file in playlistFiles)
+                foreach (var song in playlist.Songs)
                 {
-                    string title = mb.MbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.TrackTitle);
-                    string artist = mb.MbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.Artist);
-                    string album = mb.MbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.Album);
+                    string title = song.Title;
+                    string artist = song.Artist;
+                    string album = song.Album;
 
                     string artistEsc = EscapeChar(artist.ToLower());
                     string titleEsc = EscapeChar(title.ToLower());
@@ -269,7 +257,7 @@ namespace MusicBeePlugin.Services
                             ArtistName = track.Artists.FirstOrDefault().Name,
                             PlaylistName = playlist.Name,
                             TrackName = track.Name,
-                            SearchedSpotify = false
+                            SearchedService = false
                         });
                     }
                 }
@@ -339,22 +327,6 @@ namespace MusicBeePlugin.Services
                 .Replace(":", " ")
                 .Replace(";", " ")
                 .Replace(" ", " ");
-        }
-
-
-        public class UnableToFindSpotifyTrackError : IPlaylistSyncError
-        {
-            public string PlaylistName { get; set; }
-            public string TrackName { get; set; }
-            public string ArtistName { get; set; }
-            public string AlbumName { get; set; }
-            public bool SearchedSpotify { get; set; }
-
-            public string GetMessage()
-            {
-                string locationStr = SearchedSpotify ? "on Spotify" : "in your MusicBee library";
-                return $"For playlist \"{PlaylistName}\", couldn't find \"{TrackName}\" from \"{AlbumName}\" by \"{ArtistName}\" {locationStr}";
-            }
         }
     }
 }

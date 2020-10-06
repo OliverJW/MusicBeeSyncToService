@@ -119,26 +119,13 @@ namespace MusicBeePlugin.Services
                     thisPlaylistID = response.MutateResponses.First().ID;
                 }
 
-                // Create a list of files based on the MB Playlist
-                string[] playlistFiles = null;
-                if (mb.MbApiInterface.Playlist_QueryFiles(playlist.mbName))
-                {
-                    bool success = mb.MbApiInterface.Playlist_QueryFilesEx(playlist.mbName, ref playlistFiles);
-                    if (!success)
-                        throw new Exception("Couldn't get playlist files");
-                }
-                else
-                {
-                    playlistFiles = new string[0];
-                }
-
                 List<Track> songsToAdd = new List<Track>();
                 // And get the title and artist of each file, and add it to the GMusic playlist
-                foreach (string file in playlistFiles)
+                foreach (var song in playlist.Songs)
                 {
-                    string title = mb.MbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.TrackTitle);
-                    string artist = mb.MbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.Artist);
-                    string album = mb.MbApiInterface.Library_GetFileTag(file, Plugin.MetaDataType.Album);
+                    string title = song.Title;
+                    string artist = song.Artist;
+                    string album = song.Album;
 
                     // First check for matching title, artist, album, if we find nothing, then check for matching title/artist
                     Track gSong = GoogleSongsFetched.FirstOrDefault(item => (item.Artist.ToLower() == artist.ToLower() && item.Title.ToLower() == title.ToLower() && item.Album.ToLower() == album.ToLower()));
@@ -161,13 +148,13 @@ namespace MusicBeePlugin.Services
                             else
                             {
                                 // didn't find it even via querying 
-                                errors.Add(new UnableToFindGoogleTrackError()
+                                errors.Add(new UnableToFindGPMTrackError()
                                 {
                                     PlaylistName = gpmPlaylistName,
                                     AlbumName = album,
                                     ArtistName = artist,
                                     TrackName = title,
-                                    IsGpmTrack = true
+                                    SearchedService = true,
                                 });
                             }
                         }
@@ -229,13 +216,13 @@ namespace MusicBeePlugin.Services
                         }
                         else
                         {
-                            errors.Add(new UnableToFindGoogleTrackError()
+                            errors.Add(new UnableToFindGPMTrackError()
                             {
                                 AlbumName = thisSong.Album,
                                 ArtistName = thisSong.Artist,
                                 PlaylistName = playlist.Name,
                                 TrackName = thisSong.Title,
-                                IsGpmTrack = false
+                                SearchedService = false,
                             });
                         }
                     }
@@ -281,34 +268,17 @@ namespace MusicBeePlugin.Services
         {
             return track == null || track.Artist == null || track.Artist == "" || track.Title == null || track.Title == "";
         }
+    }
 
-        public class UnableToFindGooglePlaylistEntryError : IPlaylistSyncError
+    public class UnableToFindGooglePlaylistEntryError : IPlaylistSyncError
+    {
+        public string GpmTrackId { get; set; }
+        public string GpmPlaylistPosition { get; set; }
+        public string GpmPlaylistName { get; set; }
+
+        public string GetMessage()
         {
-            public string GpmTrackId { get; set; }
-            public string GpmPlaylistPosition { get; set; }
-            public string GpmPlaylistName { get; set; }
-
-            public string GetMessage()
-            {
-                return $"For entry \"{GpmPlaylistPosition}\" of Google Play playlist \"{GpmPlaylistName}\", couldn't find track in Google Play with track id of \"{GpmTrackId}\"";
-            }
+            return $"For entry \"{GpmPlaylistPosition}\" of Google Play playlist \"{GpmPlaylistName}\", couldn't find track in Google Play with track id of \"{GpmTrackId}\"";
         }
-
-        public class UnableToFindGoogleTrackError : IPlaylistSyncError
-        {
-            public string PlaylistName { get; set; }
-            public string TrackName { get; set; }
-            public string ArtistName { get; set; }
-            public string AlbumName { get; set; }
-            public bool IsGpmTrack { get; set; }
-
-            public string GetMessage()
-            {
-                string locationStr = IsGpmTrack ? "on Google Play" : "in your MusicBee library";
-                return $"For playlist \"{PlaylistName}\", couldn't find \"{TrackName}\" from \"{AlbumName}\" by \"{ArtistName}\" {locationStr}";
-            }
-        }
-
-
     }
 }
