@@ -7,8 +7,8 @@
         Title="MainWindow" Height="700" Width="680" Background="Gray">
     <Grid>
         <TextBox x:Name="OutputTextBox" HorizontalAlignment="Left" Height="160" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="655" IsReadOnly="True"/>
-        <CheckBox x:Name="IncludeFoldersCheckBox" Content="Include Folders in Playlist Name" IsChecked="{Binding Path=Settings.IncludeFoldersInPlaylistName}" HorizontalAlignment="Left" Margin="10,648,0,0" VerticalAlignment="Top"/>
-        <CheckBox x:Name="IncludeZCheckBox" Content="Include Z at Start of Date Playlists" IsChecked="{Binding Path=Settings.IncludeZAtStartOfDatePlaylistName}"  HorizontalAlignment="Left" Margin="203,648,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="IncludeFoldersCheckBox" Content="Include Folders in Playlist Name" IsChecked="False" HorizontalAlignment="Left" Margin="10,648,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="IncludeZCheckBox" Content="Include Z at Start of Date Playlists" IsChecked="False"  HorizontalAlignment="Left" Margin="203,648,0,0" VerticalAlignment="Top"/>
         <ListBox x:Name="MusicBeeListBox" HorizontalAlignment="Left" Height="468" Margin="10,175,0,0" VerticalAlignment="Top" Width="300">
             <ListBox.ItemTemplate>
                 <DataTemplate>
@@ -26,36 +26,6 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <CheckBox IsChecked="{Binding IsChecked}" Content="{Binding Path=Name}"/>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Grid>
-            </TabItem>
-            
-            <TabItem Header="YoutubeMusic">
-                <Grid>
-                    <Button x:Name="YoutubeLoginButton" Click="YoutubeLoginButton_Click" Content="Login" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="10,9,0,0"/>
-                    <Button x:Name="YoutubeSyncButton" Click="YoutubeSyncButton_Click" Content="Synchronize Selected" IsEnabled="False" HorizontalAlignment="Left" Margin="172,10,0,0" VerticalAlignment="Top" Width="118" Height="20"/>
-                    <CheckBox x:Name="YoutubeSelectAllButton" Checked="YoutubeSelectAllButton_Checked" Unchecked="YoutubeSelectAllButton_Unchecked" Content="Select All" HorizontalAlignment="Left" Margin="98,12,0,0" VerticalAlignment="Top" IsEnabled="False"/>
-                    <ListBox x:Name="YoutubePlaylistListBox"  HorizontalAlignment="Left" Height="405" Margin="10,35,0,0" VerticalAlignment="Top" Width="280">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <CheckBox IsChecked="{Binding IsChecked}" Content="{Binding Path=Name}" />
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Grid>
-            </TabItem>
-            
-            <TabItem Header="Google (Deprecated)">
-                <Grid>
-                    <Button x:Name="GoogleLoginButton" Click="GoogleLoginButton_Click" Content="Login" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="10,9,0,0"/>
-                    <Button x:Name="GoogleSyncButton" Click="GoogleSyncButton_Click" Content="Synchronize Selected" IsEnabled="False" HorizontalAlignment="Left" Margin="172,10,0,0" VerticalAlignment="Top" Width="118" Height="20"/>
-                    <CheckBox x:Name="GoogleSelectAllButton" Checked="GoogleSelectAllButton_Checked" Unchecked="GoogleSelectAllButton_Unchecked" Content="Select All" HorizontalAlignment="Left" Margin="98,12,0,0" VerticalAlignment="Top" IsEnabled="False"/>
-                    <ListBox x:Name="GooglePlaylistListBox"  HorizontalAlignment="Left" Height="405" Margin="10,35,0,0" VerticalAlignment="Top" Width="280">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <CheckBox IsChecked="{Binding IsChecked}" Content="{Binding Path=Name}" />
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>

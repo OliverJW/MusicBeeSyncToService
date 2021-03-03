@@ -36,7 +36,7 @@ namespace MusicBeePlugin
             about.MinApiRevision = MinApiRevision;
             about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
             about.ConfigurationPanelHeight = 0;   // not implemented yet: height in pixels that musicbee should reserve in a panel for config settings. When set, a handle to an empty panel will be passed to the Configure function
-
+            
 
             createMenu();
 
@@ -101,6 +101,8 @@ namespace MusicBeePlugin
             // perform some action depending on the notification type
             switch (type)
             {
+                case NotificationType.TagsChanged:
+                    break;
                 case NotificationType.PluginStartup:
                     // Do a sync straight after we get the playlists
                     /*
