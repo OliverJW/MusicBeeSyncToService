@@ -18,7 +18,7 @@ namespace MBSyncToServiceUI
     public partial class MainWindow : Window
     {
         private bool IncludeFolders { get { return IncludeFoldersCheckBox.IsChecked.HasValue && IncludeFoldersCheckBox.IsChecked.Value; } } 
-        private bool IncludeZ { get { return IncludeZCheckBox.IsChecked.HasValue && IncludeZCheckBox.IsChecked.Value; } } 
+        private bool IncludeZ { get { return IncludeZCheckBox.IsChecked.HasValue && IncludeZCheckBox.IsChecked.Value; } }
         private bool SyncToService { get { return SyncToServiceRadioButton.IsChecked.HasValue && SyncToServiceRadioButton.IsChecked.Value; } }
         private MusicBeeSyncHelper MusicBee;
         private SpotifySyncHelper Spotify;
@@ -112,7 +112,14 @@ namespace MBSyncToServiceUI
                 if (SyncToService)
                 {
                     List<MusicBeePlaylist> mbPlaylistsToSync = GetMusicBeePlaylistsToSync();
-                    errors = await Spotify.SyncToSpotify(MusicBee, mbPlaylistsToSync, IncludeFolders, IncludeZ);
+
+                    SyncToSpotifySettings settings = new SyncToSpotifySettings()
+                    {
+                        IncludeFoldersInPlaylistName = IncludeFolders,
+                        IncludeZAtStartOfDatePlaylistName = IncludeZ,
+                    };
+
+                    errors = await Spotify.SyncToSpotify(MusicBee, mbPlaylistsToSync, settings);
                     await RefreshSpotifyPlaylists();
                 }
                 else

@@ -83,7 +83,7 @@ namespace MusicBeePlugin.Services
         }
 
         public async Task<List<IPlaylistSyncError>> SyncToSpotify(MusicBeeSyncHelper mb, List<MusicBeePlaylist> mbPlaylistsToSync,
-            bool includeFoldersInPlaylistName = false, bool includeZAtStartOfDatePlaylistName = true)
+            SyncToSpotifySettings settings)
         {
             List<IPlaylistSyncError> errors = new List<IPlaylistSyncError>();
 
@@ -94,7 +94,7 @@ namespace MusicBeePlugin.Services
                 // Unless it's been deleted, in which case pretend it doesn't exist.
                 // I'm not sure how to undelete a playlist, or even if you can
                 string spotifyPlaylistName = null;
-                if (includeFoldersInPlaylistName)
+                if (settings.IncludeFoldersInPlaylistName)
                 {
                     spotifyPlaylistName = playlist.Name;
                 }
@@ -103,7 +103,7 @@ namespace MusicBeePlugin.Services
                     spotifyPlaylistName = playlist.Name.Split('\\').Last();
                 }
 
-                if (includeZAtStartOfDatePlaylistName)
+                if (settings.IncludeZAtStartOfDatePlaylistName)
                 {
                     // if it starts with a 2, it's a date playlist
                     if (spotifyPlaylistName.StartsWith("2"))
@@ -136,7 +136,7 @@ namespace MusicBeePlugin.Services
 
 
                 List<FullTrack> songsToAdd = new List<FullTrack>();
-                // And get the title and artist of each file, and add it to the GMusic playlist
+                // And get the title and artist of each file, and add it to the Spotify playlist
                 foreach (var song in playlist.Songs)
                 {
                     string title = song.Title;
@@ -165,24 +165,14 @@ namespace MusicBeePlugin.Services
                     FullTrack trackToAdd = null;
                     foreach (FullTrack track in search.Tracks.Items)
                     {
-                        bool titleMatches = (track.Name.ToLower() == title.ToLower());
-                        bool artistMatches = (track.Artists.Exists(a => a.Name.ToLower() == artist.ToLower()));
-                        bool albumMatches = (track.Album.Name.ToLower() == album.ToLower());
+                        // Titles, artists, and albums could not be exact matches
+                        bool titleMatches = FlexibleStringMatch(track.Name, title);
+                        bool artistMatches = (track.Artists.Exists(a => FlexibleStringMatch(a.Name, artist)));
+                        bool albumMatches = FlexibleStringMatch(track.Album.Name, album);
                         if (titleMatches && artistMatches && albumMatches)
                         {
                             trackToAdd = track;
                             break;
-                        }
-                        else if ((titleMatches && artistMatches) || (titleMatches && albumMatches) || (artistMatches && albumMatches))
-                        {
-                            // if two of them match, guessing this track is correct is 
-                            // probably better than just using the firstordefault, but keep looping hoping for a better track
-                            trackToAdd = track;
-                        }
-                        else if (artistMatches && trackToAdd == null)
-                        {
-                            // if just the artist matches and we haven't found anything yet... this might be our best guess
-                            trackToAdd = track;
                         }
                     }
 
@@ -242,12 +232,23 @@ namespace MusicBeePlugin.Services
 
                 foreach (FullTrack track in tracks)
                 {
-                    string artistStr = track.Artists.FirstOrDefault().Name.ToLower();
-                    string titleStr = track.Name.ToLower();
-                    MusicBeeSong thisMbSong = mb.Songs.FirstOrDefault(s => s.Artist.ToLower() == artistStr && s.Title.ToLower() == titleStr);
-                    if (thisMbSong != null)
+                    MusicBeeSong trackToAdd = null;
+                    foreach (MusicBeeSong mbSong in mb.Songs)
                     {
-                        mbPlaylistSongs.Add(thisMbSong);
+                        // Titles, artists, and albums could not be exact matches
+                        bool titleMatches = FlexibleStringMatch(track.Name, mbSong.Title);
+                        bool artistMatches = (track.Artists.Exists(a => FlexibleStringMatch(a.Name, mbSong.Artist)));
+                        bool albumMatches = FlexibleStringMatch(track.Album.Name, mbSong.Album);
+                        if (titleMatches && artistMatches && albumMatches)
+                        {
+                            trackToAdd = mbSong;
+                            break;
+                        }
+                    }
+
+                    if (trackToAdd != null)
+                    {
+                        mbPlaylistSongs.Add(trackToAdd);
                     }
                     else
                     {
@@ -327,6 +328,18 @@ namespace MusicBeePlugin.Services
                 .Replace(":", " ")
                 .Replace(";", " ")
                 .Replace(" ", " ");
+        }
+
+        // artist, title, albums sometimes contain something like "featuring ..." which can cause a mismatch between services
+        // so we'll be more flexible in what we consider a match
+        private bool FlexibleStringMatch(string a, string b)
+        {
+            var x = a.ToLower();
+            var y = b.ToLower();
+
+            return x == y
+                || x.Contains(y)
+                || y.Contains(x);
         }
     }
 }

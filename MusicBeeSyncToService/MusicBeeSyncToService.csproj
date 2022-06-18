@@ -93,6 +93,7 @@
     <Compile Include="Models\MusicBeePlaylist.cs" />
     <Compile Include="Models\MusicBeeSong.cs" />
     <Compile Include="Models\SpotifyPlaylist.cs" />
+    <Compile Include="Models\SyncToSpotifySettings.cs" />
     <Compile Include="Services\MusicBeeSyncHelper.cs" />
     <Compile Include="Services\SpotifySecrets.cs" />
     <Compile Include="Services\SpotifySyncHelper.cs" />
