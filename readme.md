@@ -1,7 +1,7 @@
 MusicBee Sync To Service
 ======================================
 
-This is a [MusicBee](http://getmusicbee.com) plugin to synchronise local MusicBee playlists to Spotify and Google Play Music, and vice versa.
+This is a [MusicBee](http://getmusicbee.com) plugin to synchronise local MusicBee playlists to Spotify, and vice versa. Syncing with Google Play Music was removed after Google deprecated the service.
 
 Installation and Usage
 ---------------------------------
@@ -15,13 +15,3 @@ Once installed, in the header bar at the top, go to "Tools" then "Music Bee Sync
 
 
 
-C# API For Youtube Music
-----------------------------------
-
-The plugin uses my incomplete unofficial implementation of an API for Youtube Music, [YoutubeMusicApi](https://github.com/mitchhymel/YoutubeMusicApi), which is a port of the python library, [ytmusicapi](https://github.com/sigma67/ytmusicapi)
-
-
-C#/.NET API For Google Play Music
-----------------------------------
-
-The plugin uses my incomplete unofficial implementation of an API for Google Play Music, [GooglePlayMusicApi](https://github.com/mitchhymel/GooglePlayMusicAPI), which is a port of the Python library, [gmusicapi](https://github.com/simon-weber/Unofficial-Google-Music-API)
